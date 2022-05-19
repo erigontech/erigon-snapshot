@@ -1,4 +1,3 @@
-ubuntu@test-krishna:~/erigon$ ./build/bin/downloader torrent_hashes --datadir=/home/ubuntu/.turbo
 'v1-000000-000500-bodies.seg' = '74bec7d43117d423d4c7433d7af86a1fc308b29e'
 'v1-000000-000500-headers.seg' = 'a0d9e25919c438a52fd85a9300eb8528c8cc5749'
 'v1-000000-000500-transactions.seg' = '9df8ce98ca2ea3ad82fc2a300172d1b1e71cf473'
