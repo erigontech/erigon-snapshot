@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Function for URL encoding the trackers
 rawurlencode() {
