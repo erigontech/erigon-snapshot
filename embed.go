@@ -4,20 +4,20 @@ import (
 	_ "embed"
 )
 
-//go:embed erigon-snapshots/mainnet.toml
+//go:embed mainnet.toml
 var Mainnet []byte
 
-//go:embed erigon-snapshots/goerli.toml
+//go:embed goerli.toml
 var Goerli []byte
 
-//go:embed erigon-snapshots/bsc.toml
+//go:embed bsc.toml
 var Bsc []byte
 
-//go:embed erigon-snapshots/ropsten.toml
+//go:embed ropsten.toml
 var Ropsten []byte
 
-//go:embed erigon-snapshots/mumbai.toml
+//go:embed mumbai.toml
 var Mumbai []byte
 
-//go:embed erigon-snapshots/bor-mainnet.toml
+//go:embed bor-mainnet.toml
 var BorMainnet []byte
