@@ -5,19 +5,19 @@ import (
 )
 
 //go:embed erigon-snapshots/mainnet.toml
-var mainnet []byte
+var Mainnet []byte
 
 //go:embed erigon-snapshots/goerli.toml
-var goerli []byte
+var Goerli []byte
 
 //go:embed erigon-snapshots/bsc.toml
-var bsc []byte
+var Bsc []byte
 
 //go:embed erigon-snapshots/ropsten.toml
-var ropsten []byte
+var Ropsten []byte
 
 //go:embed erigon-snapshots/mumbai.toml
-var mumbai []byte
+var Mumbai []byte
 
 //go:embed erigon-snapshots/bor-mainnet.toml
-var borMainnet []byte
+var BorMainnet []byte
