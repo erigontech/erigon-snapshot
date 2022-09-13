@@ -21,3 +21,21 @@ var Mumbai []byte
 
 //go:embed bor-mainnet.toml
 var BorMainnet []byte
+
+//go:embed history/mainnet.toml
+var MainnetHistory []byte
+
+//go:embed history/goerli.toml
+var GoerliHistory []byte
+
+//go:embed history/bsc.toml
+var BscHistory []byte
+
+//go:embed history/ropsten.toml
+var RopstenHistory []byte
+
+//go:embed history/mumbai.toml
+var MumbaiHistory []byte
+
+//go:embed history/bor-mainnet.toml
+var BorMainnetHistory []byte
