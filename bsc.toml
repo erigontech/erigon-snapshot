@@ -118,3 +118,6 @@
 'v1-019500-020000-bodies.seg' = '16712bd302130a0ec34c0f7a1869b22eca31964f'
 'v1-019500-020000-headers.seg' = '7bfc0d874bfc96145ed2294fe96accdbcfcd7d9e'
 'v1-019500-020000-transactions.seg' = 'c1c2db43cd2d2008a1b9f45a9ffaf872bdbbda4f'
+'v1-020000-020500-bodies.seg' = '4e63e917fdbf856e491781c945e0c6f3c5ef0792'
+'v1-020000-020500-headers.seg' = '91554abee0c1dd2a1f8cff7aedae85ce856d4879'
+'v1-020000-020500-transactions.seg' = '2e3b7f402d3f4bfada9e73cf6d70b31378663c7c'
