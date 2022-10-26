@@ -15,3 +15,6 @@
 # vendor/
 
 .idea
+
+erigon_torrents.toml
+trackers_best.txt
