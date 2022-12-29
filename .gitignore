@@ -16,5 +16,5 @@
 
 .idea
 
-erigon_torrents.toml
+erigon_snapsnots_*.toml
 trackers_best.txt
