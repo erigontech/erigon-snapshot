@@ -90,5 +90,5 @@ done
 cat ${SNAPSHOTFILE} | while read LINE; do
   NAME=$(echo $LINE | awk '{print $1}')
   HASH=$(echo $LINE | awk '{print $3}')
-  #echo "magnet:?xt=urn:btih:${HASH}&dn=${NAME}${TRACKERS}"
+  echo "magnet:?xt=urn:btih:${HASH}&dn=${NAME}${TRACKERS}"
 done
