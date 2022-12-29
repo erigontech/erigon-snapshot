@@ -60,7 +60,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Remove quotes from TOML file
-sed -ie 's|["'\'']||g' ${SNAPSHOTFILE}
+sed -i 's|["'\'']||g' ${SNAPSHOTFILE}
 
 # Download Trackers
 URL="https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_best.txt"
@@ -71,7 +71,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Remove empty lines from trackers file
-sed -ie '/^[[:space:]]*$/d' trackers_best.txt
+sed -i '/^[[:space:]]*$/d' trackers_best.txt
 
 # Generate trackers string
 TRACKERS=""
