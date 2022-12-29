@@ -30,6 +30,13 @@ else
   DOWNLOADER="wget -qO"
 fi
 
+# Default case for Linux sed, just use "-i"
+sedi=(-i)
+case "$(uname)" in
+  # For macOS, use two parameters
+  Darwin*) sedi=(-i "")
+esac
+
 # Function for URL encoding the trackers
 rawurlencode() {
   local string="${1}"
@@ -60,7 +67,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Remove quotes from TOML file
-sed -i 's|["'\'']||g' ${SNAPSHOTFILE}
+sed "${sedi[@]}" 's|["'\'']||g' ${SNAPSHOTFILE}
 
 # Download Trackers
 URL="https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_best.txt"
@@ -71,7 +78,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Remove empty lines from trackers file
-sed -i '/^[[:space:]]*$/d' trackers_best.txt
+sed "${sedi[@]}" '/^[[:space:]]*$/d' trackers_best.txt
 
 # Generate trackers string
 TRACKERS=""
@@ -83,5 +90,5 @@ done
 cat ${SNAPSHOTFILE} | while read LINE; do
   NAME=$(echo $LINE | awk '{print $1}')
   HASH=$(echo $LINE | awk '{print $3}')
-  echo "magnet:?xt=urn:btih:${HASH}&dn=${NAME}${TRACKERS}"
+  #echo "magnet:?xt=urn:btih:${HASH}&dn=${NAME}${TRACKERS}"
 done
