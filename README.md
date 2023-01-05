@@ -1,37 +1,13 @@
-## Welcome to GitHub Pages
+## Erigon Snapshot
 
-You can use the [editor on GitHub](https://github.com/ledgerwatch/erigon-snapshot/edit/main/README.md) to maintain and preview the content for your website in Markdown files.
+This repo contains the snapshot data used when syncing Erigon with snapshots enabled.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+## Generating Magnet Links
 
-### Markdown
+This repo contains a shell script that can be used to generate [Magnet Links](https://en.wikipedia.org/wiki/Magnet_URI_scheme)
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+By default it will download and generate magnet links for Ethereum Mainnet, you can override this with the `--network` argument.
 
-```markdown
-Syntax highlighted code block
+Valid networks are what you see in this repo.
 
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [Basic writing and formatting syntax](https://docs.github.com/en/github/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/ledgerwatch/erigon-snapshot/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+Tested with Linux and OSX (wget or curl required)
