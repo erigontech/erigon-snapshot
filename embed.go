@@ -16,6 +16,9 @@ var Bsc []byte
 //go:embed ropsten.toml
 var Ropsten []byte
 
+//go:embed sepolia.toml
+var Sepolia []byte
+
 //go:embed mumbai.toml
 var Mumbai []byte
 
