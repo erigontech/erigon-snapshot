@@ -31,6 +31,9 @@ var Gnosis []byte
 //go:embed history/mainnet.toml
 var MainnetHistory []byte
 
+//go:embed history/sepolia.toml
+var SepoliaHistory []byte
+
 //go:embed history/goerli.toml
 var GoerliHistory []byte
 
