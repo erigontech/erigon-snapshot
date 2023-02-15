@@ -28,6 +28,9 @@ var BorMainnet []byte
 //go:embed gnosis.toml
 var Gnosis []byte
 
+//go:embed chiado.toml
+var Chiado []byte
+
 //go:embed history/mainnet.toml
 var MainnetHistory []byte
 
@@ -51,3 +54,6 @@ var BorMainnetHistory []byte
 
 //go:embed history/gnosis.toml
 var GnosisHistory []byte
+
+//go:embed history/chiado.toml
+var ChiadoHistory []byte
