@@ -10,9 +10,6 @@ var Mainnet []byte
 //go:embed goerli.toml
 var Goerli []byte
 
-//go:embed bsc.toml
-var Bsc []byte
-
 //go:embed ropsten.toml
 var Ropsten []byte
 
@@ -39,9 +36,6 @@ var SepoliaHistory []byte
 
 //go:embed history/goerli.toml
 var GoerliHistory []byte
-
-//go:embed history/bsc.toml
-var BscHistory []byte
 
 //go:embed history/ropsten.toml
 var RopstenHistory []byte
