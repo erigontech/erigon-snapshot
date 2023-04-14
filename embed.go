@@ -28,6 +28,9 @@ var Gnosis []byte
 //go:embed chiado.toml
 var Chiado []byte
 
+//go:embed bsc.toml
+var Bsc []byte
+
 //go:embed history/mainnet.toml
 var MainnetHistory []byte
 
@@ -51,3 +54,6 @@ var GnosisHistory []byte
 
 //go:embed history/chiado.toml
 var ChiadoHistory []byte
+
+//go:embed history/bsc.toml
+var BscHistory []byte
