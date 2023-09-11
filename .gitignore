@@ -18,3 +18,4 @@
 
 erigon_snapsnots_*.toml
 trackers_best.txt
+go.work*
