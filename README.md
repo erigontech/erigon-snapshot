@@ -2,6 +2,15 @@
 
 This repo contains the snapshot data used when syncing Erigon with snapshots enabled.
 
+## Add new files
+
+Run: 
+
+./build/bin/downloader torrent_hashes --datadir=<your> --chain=<your>
+
+Add new files to this repository. Update dependency in erigon's go.mod
+
+
 ## Generating Magnet Links
 
 This repo contains a shell script that can be used to generate [Magnet Links](https://en.wikipedia.org/wiki/Magnet_URI_scheme)
