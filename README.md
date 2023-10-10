@@ -1,14 +1,12 @@
 ## Erigon Snapshot
 
-This repo contains the snapshot data used when syncing Erigon with snapshots enabled.
+This repo contains the snapshot data used when syncing Erigon
 
-## Add new files
+## Contribute new files
 
-Run: 
+`./build/bin/downloader torrent_hashes --datadir=<your> --chain=<your>`
 
-./build/bin/downloader torrent_hashes --datadir=<your> --chain=<your>
-
-Add new files to this repository. Update dependency in erigon's go.mod
+Add output as a PR to this repository. Update dependency in erigon's go.mod
 
 
 ## Generating Magnet Links
