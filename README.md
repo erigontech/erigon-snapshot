@@ -8,12 +8,24 @@ This repo contains the snapshot data used when syncing Erigon
 
 Add output as a PR to this repository. Update dependency in erigon's go.mod
 
+## Force generate new files
+
+If your node didn't produce files yet, but db has data (node synced):
+
+```
+# stop erigon
+./build/bin/erigon retire --datadir=<your> --chain=<your>
+./build/bin/downloader torrent_create --datadir=<your> --chain=<your>
+./build/bin/downloader torrent_hashes --datadir=<your> --chain=<your>
+```
 
 ## Generating Magnet Links
 
-This repo contains a shell script that can be used to generate [Magnet Links](https://en.wikipedia.org/wiki/Magnet_URI_scheme)
+This repo contains a shell script that can be used to
+generate [Magnet Links](https://en.wikipedia.org/wiki/Magnet_URI_scheme)
 
-By default it will download and generate magnet links for Ethereum Mainnet, you can override this with the `--network` argument.
+By default it will download and generate magnet links for Ethereum Mainnet, you can override this with the `--network`
+argument.
 
 Valid networks are what you see in this repo.
 
