@@ -1,4 +1,4 @@
-package snapshothashes
+package webseed
 
 import (
 	_ "embed"
