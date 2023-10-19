@@ -1,9 +1,7 @@
-package snapshothashes
+package webseed
 
 import (
 	_ "embed"
-
-	_ "github.com/ledgerwatch/erigon-snapshot/webseed"
 )
 
 //go:embed mainnet.toml
