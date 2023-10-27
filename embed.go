@@ -16,6 +16,9 @@ var Ropsten []byte
 //go:embed sepolia.toml
 var Sepolia []byte
 
+//go:embed caplin-sepolia.toml
+var CaplinSepolia []byte
+
 //go:embed mumbai.toml
 var Mumbai []byte
 
