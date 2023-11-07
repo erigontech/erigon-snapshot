@@ -19,6 +19,9 @@ var Sepolia []byte
 //go:embed mumbai.toml
 var Mumbai []byte
 
+//go:embed amoy.toml
+var Amoy []byte
+
 //go:embed bor-mainnet.toml
 var BorMainnet []byte
 
