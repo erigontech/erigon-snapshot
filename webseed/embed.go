@@ -10,9 +10,6 @@ var Mainnet []byte
 //go:embed goerli.toml
 var Goerli []byte
 
-//go:embed ropsten.toml
-var Ropsten []byte
-
 //go:embed sepolia.toml
 var Sepolia []byte
 
