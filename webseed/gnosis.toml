@@ -1,3 +1,5 @@
 "erigon-v1" = "v1:erigon-v1-snapshots-gnosis-webseed:b02f011376e1b2399c2126e47b079cc9:1188a65fc188da9adcd43ba443e4efa3:63ef957052e12b66113a2105b901acebcf52f153dc8c6d39b5dd33161b74ac5f"
 "erigon-v2" = "v1:erigon-v2-snapshots-gnosis-webseed:b02f011376e1b2399c2126e47b079cc9:1188a65fc188da9adcd43ba443e4efa3:63ef957052e12b66113a2105b901acebcf52f153dc8c6d39b5dd33161b74ac5f"
+"erigon-v1-pub" = "v1:https://erigon-v1-snapshots-gnosis.erigon.network"
 "erigon-v2-pub" = "v1:https://erigon-v2-snapshots-gnosis.erigon.network"
+"erigon-v3-pub" = "v1:https://erigon-v3-snapshots-gnosis.erigon.network"
