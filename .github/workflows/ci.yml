@@ -1,0 +1,38 @@
+name: CI
+on:
+  push:
+    branches:
+      - main
+      - e35
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  tests:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+      - run: go install github.com/pelletier/go-toml/v2/cmd/tomll@latest
+
+      - run: tomll amoy.toml
+      - run: tomll bor-mainnet.toml
+      - run: tomll chiado.toml
+      - run: tomll gnosis.toml
+      - run: tomll goerli.toml
+      - run: tomll mainnet.toml
+      - run: tomll mumbai.toml
+      - run: tomll sepolia.toml
+
+      - run: tomll webseed/amoy.toml
+      - run: tomll webseed/bor-mainnet.toml
+      - run: tomll webseed/chiado.toml
+      - run: tomll webseed/gnosis.toml
+      - run: tomll webseed/goerli.toml
+      - run: tomll webseed/mainnet.toml
+      - run: tomll webseed/mumbai.toml
+      - run: tomll webseed/sepolia.toml
