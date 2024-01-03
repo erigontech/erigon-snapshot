@@ -1,5 +1,5 @@
-"caplin-pub" = "v1:https://public-caplin-snapshots-bor-mainnet.erigon.network"
-"erigon-v2-pub" = "v1:https://public-erigon-v2-snapshots-bor-mainnet.erigon.network"
+"caplin-pub" = "v1:https://caplin-snapshots-bor-mainnet.erigon.network"
+"erigon-v2-pub" = "v1:https://erigon-v2-snapshots-bor-mainnet.erigon.network"
 "e2-v1-pub" = "v1:https://erigon2-v1-snapshots-bor-mainnet.erigon.network"
 "e2-v3-pub" = "v1:https://erigon2-v3-snapshots-bor-mainnet.erigon.network"
 "e3-v1-pub" = "v1:https://erigon3-v1-snapshots-bor-mainnet.erigon.network"
