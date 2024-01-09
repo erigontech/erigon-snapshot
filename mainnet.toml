@@ -39,7 +39,7 @@
 'v1-002300-002400-beaconblocks.seg' = '20cb0b9b6439b31863547cfef87a18879187e40c'
 'v1-002400-002500-beaconblocks.seg' = '68c0178b3cc3960dc49de31e59b1b1a18624bc48'
 'v1-002500-002600-beaconblocks.seg' = 'cd8849d479ab09326adbe41ec67d63ef0ed255c0'
-'v1-002500-003000-bodies.seg' = '89a1f445d3e37f819b6126b7d6bcc5fc91e7724d'                                                                                                                                  [116/1812]
+'v1-002500-003000-bodies.seg' = '89a1f445d3e37f819b6126b7d6bcc5fc91e7724d'
 'v1-002500-003000-headers.seg' = '170e87336b51f56e01dc23d2097f931b376f1686'                                                                                                                                           
 'v1-002500-003000-transactions.seg' = 'e4406fb4e3063be11557dc637c2aa1349833f3fb'                                                                                                                                      
 'v1-002600-002700-beaconblocks.seg' = '5b5f35b5feae5b3df05aa7dda499128ac0dc19eb'                                                                                                                                      
@@ -97,7 +97,7 @@
 'v1-006000-006100-beaconblocks.seg' = '46116138ab21cfe933388e6fffd0e7d44921ed55'                                                                                                                                      
 'v1-006000-006500-bodies.seg' = '06dab7a47e7dfb3ad33c647499857ef657ac0aab'                                                                                                                                            
 'v1-006000-006500-headers.seg' = 'a59e6441cd40ac90bf878b83bbda702183cbe3ea' 
-'v1-006100-006200-beaconblocks.seg' = '57891eeb049d297dd25cc8b00514c713fd9b38e0'                                                                                                                             [57/1812]
+'v1-006100-006200-beaconblocks.seg' = '57891eeb049d297dd25cc8b00514c713fd9b38e0'                      
 'v1-006200-006300-beaconblocks.seg' = 'c1ded620e27dd36c4fa5e9204ecd1eedca9640f6'                                                                                                                                      
 'v1-006300-006400-beaconblocks.seg' = 'fbcefffb8b7d593c30d4fc1e771b92517fb5be81'                                                                                                                                      
 'v1-006400-006500-beaconblocks.seg' = 'd5d8009f504a2f00845f45e37dc8392ecd05e36e'                                                                                                                                      
@@ -154,7 +154,7 @@
 'v1-012000-012500-headers.seg' = '2bc52f9c15eae0dac9f9c3f6d168e117267285f3'
 'v1-012000-012500-transactions.seg' = 'ab0b22305f25fc5b7a4d6e0c3208c91fbcef8cdb'
 'v1-012500-013000-bodies.seg' = '0f8a0d28428314d4eee35428b9180ee95869a478'
-'v1-012500-013000-headers.seg' = '6cd181dc478b456b0993b1e08e316d8249bc1a41'                                                                                                                                   [0/1812]
+'v1-012500-013000-headers.seg' = '6cd181dc478b456b0993b1e08e316d8249bc1a41'
 'v1-012500-013000-transactions.seg' = '97bc101926066b679b385449fd7fa1e7da54f98a'
 'v1-013000-013500-bodies.seg' = '22929bd3952d4aab454a90400e11b66a32ac82d2'
 'v1-013000-013500-headers.seg' = '4ea8db1b2afe382c8fa667d052918ec389be0eb7'
