@@ -1,6 +1,6 @@
 'domain/v1-accounts.0-256.kv' = 'ca17b00d6e157a1c7d2abb93674907c9f6e372e3'
 'domain/v1-code.0-256.kv' = '34b5e5ffde255f40cc03ce146de3448dbd9b9f9d'
-'domain/v1-commitment.0-256.kv' = '3ccf1f2ecbe6e7db71de3a537b38b772ec5cc8ce'
+'domain/v1-commitment.0-256.kv' = '5ff314a9eef09fc27b291eb58d229c1ef8e74013'
 'domain/v1-storage.0-256.kv' = 'fc63f09c759b7a8bae67973bcc15f6f43838aa3a'
 'history/v1-accounts.0-64.v' = '6ec48eecdd23ce4b22bbaa8cc6410ccdd246c32b'
 'history/v1-accounts.128-192.v' = '69c698242b9b7ec06c8dbbc6901101900acf3c90'
