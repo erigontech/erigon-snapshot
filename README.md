@@ -14,7 +14,7 @@ If your node didn't produce files yet, but db has data (node synced):
 
 ```
 # stop erigon
-./build/bin/erigon retire --datadir=<your> --chain=<your>
+./build/bin/erigon retire --datadir=<your>
 ./build/bin/downloader torrent_create --datadir=<your>
 ./build/bin/downloader torrent_hashes --datadir=<your>
 ```
