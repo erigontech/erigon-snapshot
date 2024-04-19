@@ -4,7 +4,7 @@ This repo contains the snapshot data used when syncing Erigon
 
 ## Contribute new files
 
-`./build/bin/downloader torrent_hashes --datadir=<your> --chain=<your>`
+`./build/bin/downloader torrent_hashes --datadir=<your>`
 
 Add output as a PR to this repository. Update dependency in erigon's go.mod
 
@@ -14,9 +14,9 @@ If your node didn't produce files yet, but db has data (node synced):
 
 ```
 # stop erigon
-./build/bin/erigon retire --datadir=<your> --chain=<your>
-./build/bin/downloader torrent_create --datadir=<your> --chain=<your>
-./build/bin/downloader torrent_hashes --datadir=<your> --chain=<your>
+./build/bin/erigon snapshots retire --datadir=<your>
+./build/bin/downloader torrent_create --datadir=<your>
+./build/bin/downloader torrent_hashes --datadir=<your>
 ```
 
 ## Generating Magnet Links
