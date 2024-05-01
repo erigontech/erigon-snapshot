@@ -2,6 +2,7 @@ package snapshothashes
 
 import (
 	_ "embed"
+	"fmt"
 	"io"
 	"net/http"
 
@@ -77,5 +78,9 @@ func fetchSnapshotHashes(url string) ([]byte, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	return io.ReadAll(resp.Body)
+	res, err := io.ReadAll(resp.Body)
+	if len(res) == 0 {
+		return nil, fmt.Errorf("empty response from %s", url)
+	}
+	return res, err
 }
