@@ -6,7 +6,7 @@
 'domain/v1-code.2560-2624.kv' = 'a7164582ae6cb55729824da4340afa342862a60c'
 'domain/v1-commitment.0-2048.kv' = 'bdc3ad1344c1ac40984ab2642a578a9371e84ed2'
 'domain/v1-commitment.2048-2560.kv' = 'c12e1d7c0970e084f863201e7d0a53164d48b564'
-'domain/v1-commitment.2560-2624.kv' = 'f5294f0be3154cc71044ba71987eb8eb5a6c2101'
+'domain/v1-commitment.2560-2624.kv' = 'c2f9fcba3c7a81d71a3ef6dbc152149e0571247f'
 'domain/v1-storage.0-2048.kv' = 'c607cf5fa297acd1c18509007dcf1349ec15b7db'
 'domain/v1-storage.2048-2560.kv' = '8b39547be94856ff4a1f8b8c73d13d0be3ff33fb'
 'domain/v1-storage.2560-2624.kv' = '8b43a95991250254e4b2516aa7b5de49f18a7f32'
