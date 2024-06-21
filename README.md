@@ -30,3 +30,10 @@ argument.
 Valid networks are what you see in this repo.
 
 Tested with Linux and OSX (wget or curl required)
+
+## See also
+
+```
+./build/bin/erigon snapshots integrity
+```
+  
