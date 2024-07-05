@@ -7,9 +7,6 @@ import (
 //go:embed mainnet.toml
 var Mainnet []byte
 
-//go:embed goerli.toml
-var Goerli []byte
-
 //go:embed sepolia.toml
 var Sepolia []byte
 
