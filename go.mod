@@ -1,3 +1,3 @@
-module github.com/ledgerwatch/erigon-snapshot
+module github.com/erigontech/erigon-snapshot
 
 go 1.18
