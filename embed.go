@@ -26,3 +26,6 @@ var Gnosis []byte
 
 //go:embed chiado.toml
 var Chiado []byte
+
+//go:embed holesky.toml
+var Holesky []byte
