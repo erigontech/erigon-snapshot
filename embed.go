@@ -9,6 +9,8 @@ import (
 	_ "github.com/erigontech/erigon-snapshot/webseed"
 )
 
+var branchReference = "main"
+
 //go:embed mainnet.toml
 var Mainnet []byte
 
@@ -33,16 +35,20 @@ var Chiado []byte
 //go:embed holesky.toml
 var Holesky []byte
 
+func getURLByChain(chain string) string {
+	return fmt.Sprintf("https://raw.githubusercontent.com/ledgerwatch/erigon-snapshot/%s/%s.toml", branchReference, chain)
+}
+
 func LoadSnapshots() (couldFetch bool) {
 	var (
-		mainnetUrl    = "https://raw.githubusercontent.com/ledgerwatch/erigon-snapshot/main/mainnet.toml"
-		sepoliaUrl    = "https://raw.githubusercontent.com/ledgerwatch/erigon-snapshot/main/sepolia.toml"
-		mumbaiUrl     = "https://raw.githubusercontent.com/ledgerwatch/erigon-snapshot/main/mumbai.toml"
-		amoyUrl       = "https://raw.githubusercontent.com/ledgerwatch/erigon-snapshot/main/amoy.toml"
-		borMainnetUrl = "https://raw.githubusercontent.com/ledgerwatch/erigon-snapshot/main/bor-mainnet.toml"
-		gnosisUrl     = "https://raw.githubusercontent.com/ledgerwatch/erigon-snapshot/main/gnosis.toml"
-		chiadoUrl     = "https://raw.githubusercontent.com/ledgerwatch/erigon-snapshot/main/chiado.toml"
-		holeskyUrl    = "https://raw.githubusercontent.com/ledgerwatch/erigon-snapshot/main/holesky.toml"
+		mainnetUrl    = getURLByChain("mainnet")
+		sepoliaUrl    = getURLByChain("sepolia")
+		mumbaiUrl     = getURLByChain("mumbai")
+		amoyUrl       = getURLByChain("amoy")
+		borMainnetUrl = getURLByChain("bor-mainnet")
+		gnosisUrl     = getURLByChain("gnosis")
+		chiadoUrl     = getURLByChain("chiado")
+		holeskyUrl    = getURLByChain("holesky")
 	)
 	var hashes []byte
 	var err error
