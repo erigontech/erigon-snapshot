@@ -23,7 +23,6 @@ jobs:
       - run: tomll bor-mainnet.toml
       - run: tomll chiado.toml
       - run: tomll gnosis.toml
-      - run: tomll goerli.toml
       - run: tomll mainnet.toml
       - run: tomll mumbai.toml
       - run: tomll sepolia.toml
@@ -32,7 +31,6 @@ jobs:
       - run: tomll webseed/bor-mainnet.toml
       - run: tomll webseed/chiado.toml
       - run: tomll webseed/gnosis.toml
-      - run: tomll webseed/goerli.toml
       - run: tomll webseed/mainnet.toml
       - run: tomll webseed/mumbai.toml
       - run: tomll webseed/sepolia.toml

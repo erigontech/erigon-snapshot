@@ -6,14 +6,11 @@ import (
 	"io"
 	"net/http"
 
-	_ "github.com/ledgerwatch/erigon-snapshot/webseed"
+	_ "github.com/erigontech/erigon-snapshot/webseed"
 )
 
 //go:embed mainnet.toml
 var Mainnet []byte
-
-//go:embed goerli.toml
-var Goerli []byte
 
 //go:embed sepolia.toml
 var Sepolia []byte

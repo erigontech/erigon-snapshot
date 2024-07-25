@@ -59,7 +59,7 @@ rawurlencode() {
 SNAPSHOTFILE="erigon_snapshots_${NETWORK}.toml"
 
 # Download TOML file
-URL="https://raw.githubusercontent.com/ledgerwatch/erigon-snapshot/main/${NETWORK}.toml"
+URL="https://raw.githubusercontent.com/erigontech/erigon-snapshot/main/${NETWORK}.toml"
 ${DOWNLOADER} ${SNAPSHOTFILE} ${URL}
 if [ $? -ne 0 ]; then
   echo "Failed to download ${URL}"
