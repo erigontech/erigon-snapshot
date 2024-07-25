@@ -117,3 +117,4 @@ func fetchSnapshotHashes(url string) ([]byte, error) {
 	}
 	return res, err
 }
+
