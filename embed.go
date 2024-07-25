@@ -30,43 +30,73 @@ var Gnosis []byte
 //go:embed chiado.toml
 var Chiado []byte
 
-func init() {
+//go:embed holesky.toml
+var Holesky []byte
+
+func LoadSnapshots() (couldFetch bool) {
 	var (
 		mainnetUrl    = "https://raw.githubusercontent.com/ledgerwatch/erigon-snapshot/main/mainnet.toml"
-		goerliUrl     = "https://raw.githubusercontent.com/ledgerwatch/erigon-snapshot/main/goerli.toml"
 		sepoliaUrl    = "https://raw.githubusercontent.com/ledgerwatch/erigon-snapshot/main/sepolia.toml"
 		mumbaiUrl     = "https://raw.githubusercontent.com/ledgerwatch/erigon-snapshot/main/mumbai.toml"
 		amoyUrl       = "https://raw.githubusercontent.com/ledgerwatch/erigon-snapshot/main/amoy.toml"
 		borMainnetUrl = "https://raw.githubusercontent.com/ledgerwatch/erigon-snapshot/main/bor-mainnet.toml"
 		gnosisUrl     = "https://raw.githubusercontent.com/ledgerwatch/erigon-snapshot/main/gnosis.toml"
 		chiadoUrl     = "https://raw.githubusercontent.com/ledgerwatch/erigon-snapshot/main/chiado.toml"
+		holeskyUrl    = "https://raw.githubusercontent.com/ledgerwatch/erigon-snapshot/main/holesky.toml"
 	)
-
+	var hashes []byte
+	var err error
 	// Try to fetch the latest snapshot hashes from the web
-	if hashes, err := fetchSnapshotHashes(mainnetUrl); err == nil {
-		Mainnet = hashes
+	if hashes, err = fetchSnapshotHashes(mainnetUrl); err != nil {
+		couldFetch = false
+		return
 	}
-	if hashes, err := fetchSnapshotHashes(goerliUrl); err == nil {
-		Goerli = hashes
+	Mainnet = hashes
+
+	if hashes, err = fetchSnapshotHashes(sepoliaUrl); err != nil {
+		couldFetch = false
+		return
 	}
-	if hashes, err := fetchSnapshotHashes(sepoliaUrl); err == nil {
-		Sepolia = hashes
+	Sepolia = hashes
+
+	if hashes, err = fetchSnapshotHashes(mumbaiUrl); err != nil {
+		couldFetch = false
+		return
 	}
-	if hashes, err := fetchSnapshotHashes(mumbaiUrl); err == nil {
-		Mumbai = hashes
+	Mumbai = hashes
+
+	if hashes, err = fetchSnapshotHashes(amoyUrl); err != nil {
+		couldFetch = false
+		return
 	}
-	if hashes, err := fetchSnapshotHashes(amoyUrl); err == nil {
-		Amoy = hashes
+	Amoy = hashes
+
+	if hashes, err = fetchSnapshotHashes(borMainnetUrl); err != nil {
+		couldFetch = false
+		return
 	}
-	if hashes, err := fetchSnapshotHashes(borMainnetUrl); err == nil {
-		BorMainnet = hashes
+	BorMainnet = hashes
+
+	if hashes, err = fetchSnapshotHashes(gnosisUrl); err != nil {
+		couldFetch = false
+		return
 	}
-	if hashes, err := fetchSnapshotHashes(gnosisUrl); err == nil {
-		Gnosis = hashes
+	Gnosis = hashes
+
+	if hashes, err = fetchSnapshotHashes(chiadoUrl); err != nil {
+		couldFetch = false
+		return
 	}
-	if hashes, err := fetchSnapshotHashes(chiadoUrl); err == nil {
-		Chiado = hashes
+	Chiado = hashes
+
+	if hashes, err = fetchSnapshotHashes(holeskyUrl); err != nil {
+		couldFetch = false
+		return
 	}
+	Holesky = hashes
+
+	couldFetch = true
+	return
 }
 
 func fetchSnapshotHashes(url string) ([]byte, error) {
