@@ -3,7 +3,7 @@ package snapshothashes
 import "testing"
 
 func TestFetchSnapshotHashes(t *testing.T) {
-	dat, err := fetchSnapshotHashes("https://raw.githubusercontent.com/ledgerwatch/erigon-snapshot/main/mainnet.toml")
+	dat, err := fetchSnapshotHashes("https://raw.githubusercontent.com/erigontech/erigon-snapshot/main/mainnet.toml")
 	if err != nil {
 		t.Errorf("fetchSnapshotHashes() failed: %v", err)
 	}
