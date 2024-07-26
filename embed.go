@@ -36,7 +36,7 @@ var Chiado []byte
 var Holesky []byte
 
 func getURLByChain(chain string) string {
-	return fmt.Sprintf("https://raw.githubusercontent.com/ledgerwatch/erigon-snapshot/%s/%s.toml", branchReference, chain)
+	return fmt.Sprintf("https://raw.githubusercontent.com/erigontech/erigon-snapshot/%s/%s.toml", branchReference, chain)
 }
 
 func LoadSnapshots() (couldFetch bool) {
