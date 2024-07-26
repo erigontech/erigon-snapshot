@@ -9,7 +9,15 @@ import (
 	_ "github.com/erigontech/erigon-snapshot/webseed"
 )
 
-var branchReference = "main"
+var branchReference = getBranchReference()
+
+func getBranchReference() string {
+	v, _ := os.LookupEnv("SNAPS_GIT_BRANCH")
+	if v != "" {
+		return v
+	}
+	return "main"
+}
 
 //go:embed mainnet.toml
 var Mainnet []byte
