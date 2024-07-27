@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 
 	_ "github.com/erigontech/erigon-snapshot/webseed"
 )
@@ -125,4 +126,3 @@ func fetchSnapshotHashes(url string) ([]byte, error) {
 	}
 	return res, err
 }
-
