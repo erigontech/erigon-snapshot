@@ -22,9 +22,6 @@ func TestFetchSnapshotHashesAll(t *testing.T) {
 	if len(Sepolia) == 0 {
 		t.Errorf("Sepolia is empty")
 	}
-	if len(Mumbai) == 0 {
-		t.Errorf("Mumbai is empty")
-	}
 	if len(Amoy) == 0 {
 		t.Errorf("Amoy is empty")
 	}

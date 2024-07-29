@@ -26,9 +26,6 @@ var Mainnet []byte
 //go:embed sepolia.toml
 var Sepolia []byte
 
-//go:embed mumbai.toml
-var Mumbai []byte
-
 //go:embed amoy.toml
 var Amoy []byte
 
@@ -52,7 +49,6 @@ func LoadSnapshots() (couldFetch bool) {
 	var (
 		mainnetUrl    = getURLByChain("mainnet")
 		sepoliaUrl    = getURLByChain("sepolia")
-		mumbaiUrl     = getURLByChain("mumbai")
 		amoyUrl       = getURLByChain("amoy")
 		borMainnetUrl = getURLByChain("bor-mainnet")
 		gnosisUrl     = getURLByChain("gnosis")
@@ -73,12 +69,6 @@ func LoadSnapshots() (couldFetch bool) {
 		return
 	}
 	Sepolia = hashes
-
-	if hashes, err = fetchSnapshotHashes(mumbaiUrl); err != nil {
-		couldFetch = false
-		return
-	}
-	Mumbai = hashes
 
 	if hashes, err = fetchSnapshotHashes(amoyUrl); err != nil {
 		couldFetch = false
