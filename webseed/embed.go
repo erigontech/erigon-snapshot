@@ -10,9 +10,6 @@ var Mainnet []byte
 //go:embed sepolia.toml
 var Sepolia []byte
 
-//go:embed mumbai.toml
-var Mumbai []byte
-
 //go:embed amoy.toml
 var Amoy []byte
 

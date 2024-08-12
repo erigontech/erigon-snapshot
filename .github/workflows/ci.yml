@@ -24,7 +24,6 @@ jobs:
       - run: tomll chiado.toml
       - run: tomll gnosis.toml
       - run: tomll mainnet.toml
-      - run: tomll mumbai.toml
       - run: tomll sepolia.toml
 
       - run: tomll webseed/amoy.toml
@@ -32,5 +31,4 @@ jobs:
       - run: tomll webseed/chiado.toml
       - run: tomll webseed/gnosis.toml
       - run: tomll webseed/mainnet.toml
-      - run: tomll webseed/mumbai.toml
       - run: tomll webseed/sepolia.toml
