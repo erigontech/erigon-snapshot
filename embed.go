@@ -17,7 +17,7 @@ func getBranchReference() string {
 	if v != "" {
 		return v
 	}
-	return "main"
+	return "5817efc856c1909b63310611056d151dc5b7bcb2"
 }
 
 //go:embed mainnet.toml
