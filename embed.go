@@ -45,7 +45,7 @@ func getURLByChain(chain string) string {
 	return fmt.Sprintf("https://raw.githubusercontent.com/erigontech/erigon-snapshot/%s/%s.toml", branchReference, chain)
 }
 
-func LoadSnapshots() (couldFetch bool) {
+func LoadSnapshots() (fetched bool, err error) {
 	var (
 		mainnetUrl    = getURLByChain("mainnet")
 		sepoliaUrl    = getURLByChain("sepolia")
@@ -56,52 +56,51 @@ func LoadSnapshots() (couldFetch bool) {
 		holeskyUrl    = getURLByChain("holesky")
 	)
 	var hashes []byte
-	var err error
 	// Try to fetch the latest snapshot hashes from the web
 	if hashes, err = fetchSnapshotHashes(mainnetUrl); err != nil {
-		couldFetch = false
+		fetched = false
 		return
 	}
 	Mainnet = hashes
 
 	if hashes, err = fetchSnapshotHashes(sepoliaUrl); err != nil {
-		couldFetch = false
+		fetched = false
 		return
 	}
 	Sepolia = hashes
 
 	if hashes, err = fetchSnapshotHashes(amoyUrl); err != nil {
-		couldFetch = false
+		fetched = false
 		return
 	}
 	Amoy = hashes
 
 	if hashes, err = fetchSnapshotHashes(borMainnetUrl); err != nil {
-		couldFetch = false
+		fetched = false
 		return
 	}
 	BorMainnet = hashes
 
 	if hashes, err = fetchSnapshotHashes(gnosisUrl); err != nil {
-		couldFetch = false
+		fetched = false
 		return
 	}
 	Gnosis = hashes
 
 	if hashes, err = fetchSnapshotHashes(chiadoUrl); err != nil {
-		couldFetch = false
+		fetched = false
 		return
 	}
 	Chiado = hashes
 
 	if hashes, err = fetchSnapshotHashes(holeskyUrl); err != nil {
-		couldFetch = false
+		fetched = false
 		return
 	}
 	Holesky = hashes
 
-	couldFetch = true
-	return
+	fetched = true
+	return fetched, nil
 }
 
 func fetchSnapshotHashes(url string) ([]byte, error) {
@@ -110,6 +109,9 @@ func fetchSnapshotHashes(url string) ([]byte, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to fetch snapshot hashes by %q: status code %d %s", url, resp.StatusCode, resp.Status)
+	}
 	res, err := io.ReadAll(resp.Body)
 	if len(res) == 0 {
 		return nil, fmt.Errorf("empty response from %s", url)
