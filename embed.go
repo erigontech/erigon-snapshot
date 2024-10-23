@@ -1,6 +1,7 @@
 package snapshothashes
 
 import (
+	"context"
 	_ "embed"
 	"fmt"
 	"io"
@@ -45,7 +46,7 @@ func getURLByChain(chain string) string {
 	return fmt.Sprintf("https://raw.githubusercontent.com/erigontech/erigon-snapshot/%s/%s.toml", branchReference, chain)
 }
 
-func LoadSnapshots() (fetched bool, err error) {
+func LoadSnapshots(ctx context.Context) (fetched bool, err error) {
 	var (
 		mainnetUrl    = getURLByChain("mainnet")
 		sepoliaUrl    = getURLByChain("sepolia")
@@ -57,43 +58,43 @@ func LoadSnapshots() (fetched bool, err error) {
 	)
 	var hashes []byte
 	// Try to fetch the latest snapshot hashes from the web
-	if hashes, err = fetchSnapshotHashes(mainnetUrl); err != nil {
+	if hashes, err = fetchSnapshotHashes(ctx, mainnetUrl); err != nil {
 		fetched = false
 		return
 	}
 	Mainnet = hashes
 
-	if hashes, err = fetchSnapshotHashes(sepoliaUrl); err != nil {
+	if hashes, err = fetchSnapshotHashes(ctx, sepoliaUrl); err != nil {
 		fetched = false
 		return
 	}
 	Sepolia = hashes
 
-	if hashes, err = fetchSnapshotHashes(amoyUrl); err != nil {
+	if hashes, err = fetchSnapshotHashes(ctx, amoyUrl); err != nil {
 		fetched = false
 		return
 	}
 	Amoy = hashes
 
-	if hashes, err = fetchSnapshotHashes(borMainnetUrl); err != nil {
+	if hashes, err = fetchSnapshotHashes(ctx, borMainnetUrl); err != nil {
 		fetched = false
 		return
 	}
 	BorMainnet = hashes
 
-	if hashes, err = fetchSnapshotHashes(gnosisUrl); err != nil {
+	if hashes, err = fetchSnapshotHashes(ctx, gnosisUrl); err != nil {
 		fetched = false
 		return
 	}
 	Gnosis = hashes
 
-	if hashes, err = fetchSnapshotHashes(chiadoUrl); err != nil {
+	if hashes, err = fetchSnapshotHashes(ctx, chiadoUrl); err != nil {
 		fetched = false
 		return
 	}
 	Chiado = hashes
 
-	if hashes, err = fetchSnapshotHashes(holeskyUrl); err != nil {
+	if hashes, err = fetchSnapshotHashes(ctx, holeskyUrl); err != nil {
 		fetched = false
 		return
 	}

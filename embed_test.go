@@ -1,9 +1,12 @@
 package snapshothashes
 
-import "testing"
+import (
+	"context"
+	"testing"
+)
 
 func TestFetchSnapshotHashes(t *testing.T) {
-	dat, err := fetchSnapshotHashes("https://raw.githubusercontent.com/erigontech/erigon-snapshot/main/mainnet.toml")
+	dat, err := fetchSnapshotHashes(context.Background(), "https://raw.githubusercontent.com/erigontech/erigon-snapshot/main/mainnet.toml")
 	if err != nil {
 		t.Errorf("fetchSnapshotHashes() failed: %v", err)
 	}
@@ -13,7 +16,11 @@ func TestFetchSnapshotHashes(t *testing.T) {
 }
 
 func TestFetchSnapshotHashesAll(t *testing.T) {
-	if !LoadSnapshots() {
+	ok, err := LoadSnapshots(context.Background())
+	if err != nil {
+		t.Errorf("LoadSnapshots() failed %s", err)
+	}
+	if !ok {
 		t.Errorf("LoadSnapshots() failed")
 	}
 	if len(Mainnet) == 0 {
