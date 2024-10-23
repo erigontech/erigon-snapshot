@@ -103,8 +103,12 @@ func LoadSnapshots() (fetched bool, err error) {
 	return fetched, nil
 }
 
-func fetchSnapshotHashes(url string) ([]byte, error) {
-	resp, err := http.Get(url)
+func fetchSnapshotHashes(ctx context.Context, url string) ([]byte, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
