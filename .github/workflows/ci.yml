@@ -17,6 +17,9 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.23'
+
+      - run: go test ./...
+
       - run: go install github.com/pelletier/go-toml/v2/cmd/tomll@latest
 
       - run: tomll amoy.toml
@@ -33,4 +36,3 @@ jobs:
       - run: tomll webseed/mainnet.toml
       - run: tomll webseed/sepolia.toml
 
-      - run: go test ./...
