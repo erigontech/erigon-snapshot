@@ -1,9 +1,2 @@
-"caplin-pub" = "v1:https://caplin-snapshots-holesky.erigon.network"
-"e2-v1-pub" = "v1:https://erigon2-v1-snapshots-holesky.erigon.network"
-"e2-v2-pub" = "v1:https://erigon2-v2-snapshots-holesky.erigon.network"
-"e2-v3-pub" = "v1:https://erigon2-v3-snapshots-holesky.erigon.network"
 "e3-v1-pub" = "v1:https://erigon3-v1-snapshots-holesky.erigon.network"
-"e3-v3-pub" = "v1:https://erigon3-v3-snapshots-holesky.erigon.network"
-"e3-v3-pub-v2" = "v1:https://erigon3-v3-snapshots-holesky.erigon.network/v2"
-
 
