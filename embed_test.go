@@ -16,7 +16,7 @@ func TestFetchSnapshotHashes(t *testing.T) {
 }
 
 func TestFetchSnapshotHashesAll(t *testing.T) {
-	ok, err := LoadSnapshots(context.Background())
+	ok, err := LoadSnapshots(context.Background(), "main")
 	if err != nil {
 		t.Errorf("LoadSnapshots() failed %s", err)
 	}
