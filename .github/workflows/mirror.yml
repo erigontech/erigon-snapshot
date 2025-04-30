@@ -19,8 +19,8 @@ env:
 on:
   pull_request:
     types: [closed]      
-    branches: 
-      - michele-mirror-test
+    # branches: 
+    #   - michele-mirror-test
 
 jobs:
   mirror:
