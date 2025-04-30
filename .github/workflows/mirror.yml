@@ -48,7 +48,7 @@ jobs:
         chmod +x /tmp/mirror
         
         
-    - name: Mirror to CDN
+    - name: Mirror '${{ github.event.pull_request.base.ref }}' to CDN <<<<-#--#--#--#--#- !!!
       run: |
         set +x
         echo '${{ secrets.MIRROR_CONF }}' | base64 -d > /tmp/mirror.conf
