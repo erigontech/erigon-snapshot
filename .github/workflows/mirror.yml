@@ -52,8 +52,12 @@ jobs:
       run: |
         set +x
         echo '${{ secrets.MIRROR_CONF }}' | base64 -d > /tmp/mirror.conf
-        /tmp/mirror $GITHUB_WORKSPACE ${{ github.event.pull_request.base.ref }} /tmp/mirror.conf > /tmp/mirror_output.txt 2>&1
-        
+        if /tmp/mirror $GITHUB_WORKSPACE ${{ github.event.pull_request.base.ref }} /tmp/mirror.conf > /tmp/mirror_output.txt 2>&1; then
+          echo -e "${{ env.YELLOW }} -------------------------------------------------------------------------------------------------------------------- ${{ env.NOCOLOUR }}"
+          echo -e "${{ env.YELLOW }} Files related to '${{ github.event.pull_request.base.ref }}' branch, after PR ${{ github.event.pull_request.number }} got merged, were successfully mirrored to CDN ${{ env.NOCOLOUR }}"
+          echo -e "${{ env.YELLOW }} -------------------------------------------------------------------------------------------------------------------- ${{ env.NOCOLOUR }}"
+        fi
+  
 
     - name: Output preparation
       run: |
