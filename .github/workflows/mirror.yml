@@ -42,7 +42,9 @@ jobs:
     - name: Download needed bits
       run: |
         set +x
-        curl https://rclone.org/install.sh | bash
+        mkdir -p $HOME/bin
+        curl https://rclone.org/install.sh | sudo bash -s -- --prefix $HOME/bin
+        echo "$HOME/bin" >> $GITHUB_PATH
         curl -L -H "Authorization: Bearer ${{ secrets.MIRROR_PAT }}" -H "Accept: application/vnd.github.v3.raw" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/erigontech/scripts/contents/erigon-snapshot/mirror.sh?ref=${{ env.TEMPLATE_BRANCH}} -o /tmp/mirror
         chmod +x /tmp/mirror
         
