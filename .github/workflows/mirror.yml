@@ -1,0 +1,78 @@
+name: Mirror
+run-name: Mirror after merging PR ${{ github.event.pull_request.number }} ${{ github.event.pull_request.html_url }}
+
+
+concurrency:
+  group: mirror-${{ github.event.pull_request.base.ref }}
+  cancel-in-progress: false
+
+
+env:
+  # proactively set for future use
+  GREEN: '\033[0;32m'
+  RED: '\033[0;31m'
+  YELLOW: '\033[0;33m'
+  NOCOLOUR: '\033[0m'
+  TEMPLATE_BRANCH: "main"
+
+
+on:
+  pull_request:
+    types: [closed]      
+    # branches: # commented: tests completed, so... from now on this workflow will be triggered for all PRs merged to any target branch
+      # - michele-mirror-test # commented: tests completed, so... from now on this workflow will be triggered for all PRs merged to any target branch
+
+jobs:
+  mirror:
+    if: github.event.pull_request.merged == true 
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 1
+        # ref: ${{ github.event.pull_request.base.ref }} #commented as a subtle problem might sometimes arise in case of n on-merge PRs/unit of time
+
+
+
+    - name: Download needed bits
+      run: |
+        set +x
+        mkdir -p ~/bin
+        curl -O https://downloads.rclone.org/rclone-current-linux-amd64.zip;unzip rclone-current-linux-amd64.zip;cp rclone-*/rclone ~/bin/;chmod +x ~/bin/rclone;echo "$HOME/bin" >> $GITHUB_PATH
+        curl -L -H "Authorization: Bearer ${{ secrets.MIRROR_PAT }}" -H "Accept: application/vnd.github.v3.raw" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/erigontech/scripts/contents/erigon-snapshot/mirror.sh?ref=${{ env.TEMPLATE_BRANCH}} -o /tmp/mirror
+        chmod +x /tmp/mirror
+        
+        
+    - name: Mirror '${{ github.event.pull_request.base.ref }}' to CDN <<<<-#--#--#--#--#- !!!
+      run: |
+        set +x
+        echo '${{ secrets.MIRROR_CONF }}' | base64 -d > /tmp/mirror.conf
+        if /tmp/mirror $GITHUB_WORKSPACE ${{ github.event.pull_request.base.ref }} /tmp/mirror.conf > /tmp/mirror_output.txt 2>&1; then
+          echo -e "${{ env.YELLOW }} ----------------------------------------------------------------------------------------------------------------------- ${{ env.NOCOLOUR }}"
+          echo -e "${{ env.YELLOW }} Files related to '${{ github.event.pull_request.base.ref }}' target branch, after PR ${{ github.event.pull_request.number }} got merged to it, were successfully mirrored to CDN ${{ env.NOCOLOUR }}"
+          echo -e "${{ env.YELLOW }} ----------------------------------------------------------------------------------------------------------------------- ${{ env.NOCOLOUR }}"
+        fi
+  
+
+    - name: Output preparation
+      run: |
+        openssl aes-256-cbc -salt -pbkdf2 -iter 900000 -in /tmp/mirror_output.txt -out /tmp/mirror_output.enc -k ${{ secrets.ENC_PSW }}
+      
+
+    - name: Upload main output as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: mirror_output.enc
+        path: /tmp/mirror_output.enc
+
+
+
+    - name: Housekeeping
+      run: |
+        rm -f /tmp/mirror /tmp/mirror_output.txt /tmp/mirror_output.enc # It is always advisable to clean up after you have made someone else's house dirty
+
