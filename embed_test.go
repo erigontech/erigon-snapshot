@@ -6,7 +6,7 @@ import (
 )
 
 func TestFetchSnapshotHashes(t *testing.T) {
-	dat, err := fetchSnapshotHashes(context.Background(), "https://raw.githubusercontent.com/erigontech/erigon-snapshot/main/mainnet.toml")
+	dat, err := fetchSnapshotHashes(context.Background(), Github, "https://raw.githubusercontent.com/erigontech/erigon-snapshot/main/mainnet.toml")
 	if err != nil {
 		t.Errorf("fetchSnapshotHashes() failed: %v", err)
 	}
@@ -16,7 +16,7 @@ func TestFetchSnapshotHashes(t *testing.T) {
 }
 
 func TestFetchSnapshotHashesAll(t *testing.T) {
-	ok, err := LoadSnapshots(context.Background(), "main")
+	ok, err := LoadSnapshots(context.Background(), Github, "main")
 	if err != nil {
 		t.Errorf("LoadSnapshots() failed %s", err)
 	}
