@@ -1,3 +1,3 @@
 module github.com/erigontech/erigon-snapshot
 
-go 1.18
+go 1.23

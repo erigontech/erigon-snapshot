@@ -1,26 +1,16 @@
 package webseed
 
 import (
-	_ "embed"
+	"embed"
 )
 
-//go:embed mainnet.toml
-var Mainnet []byte
+//go:embed *.toml
+var Tomls embed.FS
 
-//go:embed sepolia.toml
-var Sepolia []byte
-
-//go:embed amoy.toml
-var Amoy []byte
-
-//go:embed bor-mainnet.toml
-var BorMainnet []byte
-
-//go:embed gnosis.toml
-var Gnosis []byte
-
-//go:embed chiado.toml
-var Chiado []byte
-
-//go:embed holesky.toml
-var Holesky []byte
+func ForChain(chain string) []byte {
+	data, err := Tomls.ReadFile(chain)
+	if err != nil {
+		panic(err)
+	}
+	return data
+}

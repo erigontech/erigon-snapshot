@@ -2,6 +2,7 @@ package snapshothashes
 
 import (
 	"context"
+	"embed"
 	_ "embed"
 	"fmt"
 	"io"
@@ -10,87 +11,27 @@ import (
 	_ "github.com/erigontech/erigon-snapshot/webseed"
 )
 
-//go:embed mainnet.toml
-var Mainnet []byte
+//go:embed *.toml
+var Tomls embed.FS
 
-//go:embed sepolia.toml
-var Sepolia []byte
-
-//go:embed amoy.toml
-var Amoy []byte
-
-//go:embed bor-mainnet.toml
-var BorMainnet []byte
-
-//go:embed gnosis.toml
-var Gnosis []byte
-
-//go:embed chiado.toml
-var Chiado []byte
-
-//go:embed holesky.toml
-var Holesky []byte
-
-func getURLByChain(chain, branch string) string {
-	return fmt.Sprintf("https://raw.githubusercontent.com/erigontech/erigon-snapshot/%s/%s.toml", branch, chain)
+// Get embedded bytes for a chain that must exist. TODO: Reference through a helper that does the
+// path manipulation.
+func MustGetBytes(chain string) []byte {
+	data, err := Tomls.ReadFile(chain)
+	if err != nil {
+		panic(err)
+	}
+	return data
 }
 
-func LoadSnapshots(ctx context.Context, branch string) (fetched bool, err error) {
-	var (
-		mainnetUrl    = getURLByChain("mainnet", branch)
-		sepoliaUrl    = getURLByChain("sepolia", branch)
-		amoyUrl       = getURLByChain("amoy", branch)
-		borMainnetUrl = getURLByChain("bor-mainnet", branch)
-		gnosisUrl     = getURLByChain("gnosis", branch)
-		chiadoUrl     = getURLByChain("chiado", branch)
-		holeskyUrl    = getURLByChain("holesky", branch)
-	)
-	var hashes []byte
+func getURLByChain(branch, chain string) string {
+	return fmt.Sprintf("https://erigon-snapshots.erigon.network/%s/%s.toml", branch, chain)
+}
+
+func FetchSnapshot(ctx context.Context, branch string, chain string) (hashes []byte, err error) {
+	u := getURLByChain(chain, branch)
 	// Try to fetch the latest snapshot hashes from the web
-	if hashes, err = fetchSnapshotHashes(ctx, mainnetUrl); err != nil {
-		fetched = false
-		return
-	}
-	Mainnet = hashes
-
-	if hashes, err = fetchSnapshotHashes(ctx, sepoliaUrl); err != nil {
-		fetched = false
-		return
-	}
-	Sepolia = hashes
-
-	if hashes, err = fetchSnapshotHashes(ctx, amoyUrl); err != nil {
-		fetched = false
-		return
-	}
-	Amoy = hashes
-
-	if hashes, err = fetchSnapshotHashes(ctx, borMainnetUrl); err != nil {
-		fetched = false
-		return
-	}
-	BorMainnet = hashes
-
-	if hashes, err = fetchSnapshotHashes(ctx, gnosisUrl); err != nil {
-		fetched = false
-		return
-	}
-	Gnosis = hashes
-
-	if hashes, err = fetchSnapshotHashes(ctx, chiadoUrl); err != nil {
-		fetched = false
-		return
-	}
-	Chiado = hashes
-
-	if hashes, err = fetchSnapshotHashes(ctx, holeskyUrl); err != nil {
-		fetched = false
-		return
-	}
-	Holesky = hashes
-
-	fetched = true
-	return fetched, nil
+	return fetchSnapshotHashes(ctx, u)
 }
 
 func fetchSnapshotHashes(ctx context.Context, url string) ([]byte, error) {
