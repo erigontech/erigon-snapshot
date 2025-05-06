@@ -6,7 +6,7 @@ import (
 )
 
 func TestFetchMainnetMainSnapshotHashes(t *testing.T) {
-	hashes, err := FetchSnapshot(t.Context(), "main", "mainnet")
+	hashes, err := FetchSnapshotHashes(t.Context(), Github, "main", "mainnet")
 	if err != nil {
 		t.Fatalf("error fetching snapshot hashes: %v", err)
 	}
@@ -34,7 +34,7 @@ func allChains() iter.Seq[string] {
 func TestFetchSnapshotHashesAll(t *testing.T) {
 	for chain := range allChains() {
 		// Well technically this branch name isn't going to always be correct.
-		hashes, err := FetchSnapshot(t.Context(), "main", chain)
+		hashes, err := FetchSnapshotHashes(t.Context(), Github, "main", chain)
 		if err != nil {
 			t.Errorf("failed to fetch snapshot hashes for %v: %v", chain, err)
 			continue

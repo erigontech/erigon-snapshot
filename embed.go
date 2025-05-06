@@ -24,20 +24,34 @@ func MustGetBytes(chain string) []byte {
 	return data
 }
 
-func getURLByChain(branch, chain string) string {
-	return fmt.Sprintf("https://erigon-snapshots.erigon.network/%s/%s.toml", branch, chain)
+type snapshotSource struct {
+	UrlFormat string
+	Headers   http.Header
 }
 
-func FetchSnapshot(ctx context.Context, branch string, chain string) (hashes []byte, err error) {
-	u := getURLByChain(chain, branch)
-	// Try to fetch the latest snapshot hashes from the web
-	return fetchSnapshotHashes(ctx, u)
-}
+var (
+	Github = snapshotSource{
+		UrlFormat: "https://raw.githubusercontent.com/erigontech/erigon-snapshot/%s/%s.toml",
+	}
+	R2 = snapshotSource{
+		UrlFormat: "https://erigon-snapshots.erigon.network/%s/%s.toml",
+		// TODO: this was taken originally from erigon repo, downloader.go; we need to decide on a unique place to store such headers
+		Headers: http.Header{
+			"lsjdjwcush6jbnjj3jnjscoscisoc5s": []string{"I%OSJDNFKE783DDHHJD873EFSIVNI7384R78SSJBJBCCJBC32JABBJCBJK45"},
+		},
+	}
+)
 
-func fetchSnapshotHashes(ctx context.Context, url string) ([]byte, error) {
+func FetchSnapshotHashes(ctx context.Context, source snapshotSource, branch, chain string) ([]byte, error) {
+	url := fmt.Sprintf(source.UrlFormat, branch, chain)
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, err
+	}
+	for key, values := range source.Headers {
+		for _, value := range values {
+			req.Header.Add(key, value)
+		}
 	}
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
