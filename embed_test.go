@@ -1,47 +1,47 @@
 package snapshothashes
 
 import (
-	"context"
+	"iter"
 	"testing"
 )
 
-func TestFetchSnapshotHashes(t *testing.T) {
-	dat, err := fetchSnapshotHashes(context.Background(), Github, "https://raw.githubusercontent.com/erigontech/erigon-snapshot/main/mainnet.toml")
+func TestFetchMainnetMainSnapshotHashes(t *testing.T) {
+	hashes, err := FetchSnapshotHashes(t.Context(), Github, "main", "mainnet")
 	if err != nil {
-		t.Errorf("fetchSnapshotHashes() failed: %v", err)
+		t.Fatalf("error fetching snapshot hashes: %v", err)
 	}
-	if len(dat) == 0 {
-		t.Errorf("fetchSnapshotHashes() failed: empty data")
+	if len(hashes) == 0 {
+		t.Fatal("snapshot hashes are empty")
+	}
+}
+
+// Can't pull this from erigon-lib which seems to be where the canonical list is. Also can't find a
+// strongly-typed chain enum.
+func allChains() iter.Seq[string] {
+	return func(yield func(string) bool) {
+		entries, err := Tomls.ReadDir(".")
+		if err != nil {
+			panic(err)
+		}
+		for _, e := range entries {
+			if !yield(e.Name()) {
+				return
+			}
+		}
 	}
 }
 
 func TestFetchSnapshotHashesAll(t *testing.T) {
-	ok, err := LoadSnapshots(context.Background(), Github, "main")
-	if err != nil {
-		t.Errorf("LoadSnapshots() failed %s", err)
-	}
-	if !ok {
-		t.Errorf("LoadSnapshots() failed")
-	}
-	if len(Mainnet) == 0 {
-		t.Errorf("Mainnet is empty")
-	}
-	if len(Sepolia) == 0 {
-		t.Errorf("Sepolia is empty")
-	}
-	if len(Amoy) == 0 {
-		t.Errorf("Amoy is empty")
-	}
-	if len(BorMainnet) == 0 {
-		t.Errorf("BorMainnet is empty")
-	}
-	if len(Gnosis) == 0 {
-		t.Errorf("Gnosis is empty")
-	}
-	if len(Chiado) == 0 {
-		t.Errorf("Chiado is empty")
-	}
-	if len(Holesky) == 0 {
-		t.Errorf("Holesky is empty")
+	for chain := range allChains() {
+		// Well technically this branch name isn't going to always be correct.
+		hashes, err := FetchSnapshotHashes(t.Context(), Github, "main", chain)
+		if err != nil {
+			t.Errorf("failed to fetch snapshot hashes for %v: %v", chain, err)
+			continue
+		}
+		if len(hashes) == 0 {
+			t.Errorf("snapshot hashes for %v are empty", chain)
+			continue
+		}
 	}
 }
