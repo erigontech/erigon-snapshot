@@ -12,12 +12,12 @@ import (
 )
 
 //go:embed *.toml
-var Tomls embed.FS
+var tomls embed.FS
 
 // Get embedded bytes for a chain that must exist. TODO: Reference through a helper that does the
 // path manipulation.
 func MustGetBytes(chain string) []byte {
-	data, err := Tomls.ReadFile(chain)
+	data, err := tomls.ReadFile(chain + ".toml")
 	if err != nil {
 		panic(err)
 	}

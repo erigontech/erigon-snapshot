@@ -2,6 +2,7 @@ package snapshothashes
 
 import (
 	"iter"
+	"strings"
 	"testing"
 )
 
@@ -19,12 +20,13 @@ func TestFetchMainnetMainSnapshotHashes(t *testing.T) {
 // strongly-typed chain enum.
 func allChains() iter.Seq[string] {
 	return func(yield func(string) bool) {
-		entries, err := Tomls.ReadDir(".")
+		entries, err := tomls.ReadDir(".")
 		if err != nil {
 			panic(err)
 		}
 		for _, e := range entries {
-			if !yield(e.Name()) {
+			chain, valid := strings.CutSuffix(e.Name(), ".toml")
+			if valid && !yield(chain) {
 				return
 			}
 		}
