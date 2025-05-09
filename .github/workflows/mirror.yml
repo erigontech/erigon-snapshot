@@ -74,5 +74,5 @@ jobs:
 
     - name: Housekeeping
       run: |
-        rm -f /tmp/mirror /tmp/mirror_output.txt /tmp/mirror_output.enc # It is always advisable to clean up after you have made someone else's house dirty
+        rm -f /tmp/mirror /tmp/mirror_output.txt /tmp/mirror_output.enc /tmp/mirror.conf  # It is always advisable to clean up after you have made someone else's house dirty
 
