@@ -53,12 +53,15 @@ jobs:
         set +x
         echo '${{ secrets.MIRROR_CONF }}' | base64 -d > /tmp/mirror.conf
         if /tmp/mirror $GITHUB_WORKSPACE ${{ github.event.pull_request.base.ref }} /tmp/mirror.conf > /tmp/mirror_output.txt 2>&1; then
-          echo -e "${{ env.YELLOW }} ----------------------------------------------------------------------------------------------------------------------- ${{ env.NOCOLOUR }}"
+          echo -e "${{ env.YELLOW }} ----------------------------------------------------------------------------------------------------------------- ${{ env.NOCOLOUR }}"
           echo -e "${{ env.YELLOW }} Files related to '${{ github.event.pull_request.base.ref }}' target branch, after PR ${{ github.event.pull_request.number }} got merged to it, were successfully mirrored to CDN ${{ env.NOCOLOUR }}"
-          echo -e "${{ env.YELLOW }} ----------------------------------------------------------------------------------------------------------------------- ${{ env.NOCOLOUR }}"
+          echo -e "${{ env.YELLOW }} ----------------------------------------------------------------------------------------------------------------- ${{ env.NOCOLOUR }}"
+        else
+          echo -e "${{ env.RED }} ----------------------------------------------------------------------------------------------------------------- ${{ env.NOCOLOUR }}"
+          echo echo "There was an error in the mirroring process, please check the logs"
+          echo -e "${{ env.RED }} ----------------------------------------------------------------------------------------------------------------- ${{ env.NOCOLOUR }}"
         fi
   
-
     - name: Output preparation
       run: |
         openssl aes-256-cbc -salt -pbkdf2 -iter 900000 -in /tmp/mirror_output.txt -out /tmp/mirror_output.enc -k ${{ secrets.ENC_PSW }}
