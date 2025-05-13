@@ -8,7 +8,7 @@ concurrency:
 
 
 env:
-  # proactively set for future use
+  # proactively set for future use
   GREEN: '\033[0;32m'
   RED: '\033[0;31m'
   YELLOW: '\033[0;33m'
@@ -53,16 +53,28 @@ jobs:
         set +x
         echo '${{ secrets.MIRROR_CONF }}' | base64 -d > /tmp/mirror.conf
         if /tmp/mirror $GITHUB_WORKSPACE ${{ github.event.pull_request.base.ref }} /tmp/mirror.conf > /tmp/mirror_output.txt 2>&1; then
-          echo -e "${{ env.YELLOW }} ----------------------------------------------------------------------------------------------------------------------- ${{ env.NOCOLOUR }}"
+          echo -e "${{ env.YELLOW }} ----------------------------------------------------------------------------------------------------------------- ${{ env.NOCOLOUR }}"
           echo -e "${{ env.YELLOW }} Files related to '${{ github.event.pull_request.base.ref }}' target branch, after PR ${{ github.event.pull_request.number }} got merged to it, were successfully mirrored to CDN ${{ env.NOCOLOUR }}"
-          echo -e "${{ env.YELLOW }} ----------------------------------------------------------------------------------------------------------------------- ${{ env.NOCOLOUR }}"
+          echo -e "${{ env.YELLOW }} ----------------------------------------------------------------------------------------------------------------- ${{ env.NOCOLOUR }}"
+        else
+          echo -e "${{ env.RED }} ----------------------------------------------------------------------------------------------------------------- ${{ env.NOCOLOUR }}"
+          echo -e "${{ env.RED }} There was an error in the mirroring process, please check the logs ${{ env.NOCOLOUR }}"
+          echo -e "${{ env.RED }} ----------------------------------------------------------------------------------------------------------------- ${{ env.NOCOLOUR }}"
         fi
   
-
+        
     - name: Output preparation
       run: |
-        openssl aes-256-cbc -salt -pbkdf2 -iter 900000 -in /tmp/mirror_output.txt -out /tmp/mirror_output.enc -k ${{ secrets.ENC_PSW }}
-      
+        if [ -f /tmp/mirror_output.txt ]; then
+          openssl aes-256-cbc -salt -pbkdf2 -iter 900000 -in /tmp/mirror_output.txt -out /tmp/mirror_output.enc -k ${{ secrets.ENC_PSW }}
+        else
+          echo -e "${{ env.RED }} ----------------------------------------------------------------------------------------------------------------- ${{ env.NOCOLOUR }}"
+          echo -e "${{ env.RED }} /tmp/mirror_output.txt does not exist, skipping encryption and exiting with 98. ${{ env.NOCOLOUR }}"
+          echo -e "${{ env.RED }} ----------------------------------------------------------------------------------------------------------------- ${{ env.NOCOLOUR }}"
+          exit 98
+        fi
+
+
 
     - name: Upload main output as artifact
       uses: actions/upload-artifact@v4
@@ -73,5 +85,7 @@ jobs:
 
 
     - name: Housekeeping
+      if: always()
       run: |
-        rm -f /tmp/mirror /tmp/mirror_output.txt /tmp/mirror_output.enc # It is always advisable to clean up after you have made someone else's house dirty
+        rm -f /tmp/mirror /tmp/mirror_output.txt /tmp/mirror_output.enc /tmp/mirror.conf  # It is always advisable to clean up after you have made someone else's house dirty
+
