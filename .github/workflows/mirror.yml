@@ -58,7 +58,7 @@ jobs:
           echo -e "${{ env.YELLOW }} ----------------------------------------------------------------------------------------------------------------- ${{ env.NOCOLOUR }}"
         else
           echo -e "${{ env.RED }} ----------------------------------------------------------------------------------------------------------------- ${{ env.NOCOLOUR }}"
-          echo echo "There was an error in the mirroring process, please check the logs"
+          echo -e "${{ env.RED }} There was an error in the mirroring process, please check the logs ${{ env.NOCOLOUR }}"
           echo -e "${{ env.RED }} ----------------------------------------------------------------------------------------------------------------- ${{ env.NOCOLOUR }}"
         fi
   
