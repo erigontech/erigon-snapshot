@@ -53,13 +53,14 @@ func getURLByChain(source SnapshotSource, chain, branch string) string {
 
 func LoadSnapshots(ctx context.Context, source SnapshotSource, branch string) (fetched bool, err error) {
 	var (
-		mainnetUrl    = getURLByChain(source, "mainnet", branch)
-		sepoliaUrl    = getURLByChain(source, "sepolia", branch)
-		amoyUrl       = getURLByChain(source, "amoy", branch)
-		borMainnetUrl = getURLByChain(source, "bor-mainnet", branch)
-		gnosisUrl     = getURLByChain(source, "gnosis", branch)
-		chiadoUrl     = getURLByChain(source, "chiado", branch)
-		holeskyUrl    = getURLByChain(source, "holesky", branch)
+		mainnetUrl      = getURLByChain(source, "mainnet", branch)
+		sepoliaUrl      = getURLByChain(source, "sepolia", branch)
+		amoyUrl         = getURLByChain(source, "amoy", branch)
+		borMainnetUrl   = getURLByChain(source, "bor-mainnet", branch)
+		gnosisUrl       = getURLByChain(source, "gnosis", branch)
+		chiadoUrl       = getURLByChain(source, "chiado", branch)
+		holeskyUrl      = getURLByChain(source, "holesky", branch)
+		taikoAlethiaUrl = getURLByChain(source, "taiko-alethia", branch)
 	)
 	var hashes []byte
 	// Try to fetch the latest snapshot hashes from the web
@@ -104,6 +105,12 @@ func LoadSnapshots(ctx context.Context, source SnapshotSource, branch string) (f
 		return
 	}
 	Holesky = hashes
+
+	if hashes, err = fetchSnapshotHashes(ctx, source, taikoAlethiaUrl); err != nil {
+		fetched = false
+		return
+	}
+	TaikoAlethia = hashes
 
 	fetched = true
 	return fetched, nil
