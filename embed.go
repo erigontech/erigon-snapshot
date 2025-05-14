@@ -31,6 +31,9 @@ var Chiado []byte
 //go:embed holesky.toml
 var Holesky []byte
 
+//go:embed taiko-alethia.toml
+var TaikoAlethia []byte
+
 type SnapshotSource int
 
 const (
