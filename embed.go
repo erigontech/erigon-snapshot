@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/erigontech/erigon-lib/log/v3"
 	_ "github.com/erigontech/erigon-snapshot/webseed"
 )
 
@@ -51,7 +52,10 @@ func getURLByChain(source SnapshotSource, chain, branch string) string {
 	panic(fmt.Sprintf("unknown snapshot source: %d", source))
 }
 
-func LoadSnapshots(ctx context.Context, source SnapshotSource, branch string) (fetched bool, err error) {
+// Loads snapshots for all chains from the specified source and branch.
+func LoadSnapshots(ctx context.Context, source SnapshotSource, branch string) (err error) {
+	// Not going to call out that we're loading *all* chains but there's a fix coming for that.
+	log.Info("Loading remote snapshot hashes")
 	var (
 		mainnetUrl    = getURLByChain(source, "mainnet", branch)
 		sepoliaUrl    = getURLByChain(source, "sepolia", branch)
@@ -65,55 +69,46 @@ func LoadSnapshots(ctx context.Context, source SnapshotSource, branch string) (f
 	var hashes []byte
 	// Try to fetch the latest snapshot hashes from the web
 	if hashes, err = fetchSnapshotHashes(ctx, source, mainnetUrl); err != nil {
-		fetched = false
 		return
 	}
 	Mainnet = hashes
 
 	if hashes, err = fetchSnapshotHashes(ctx, source, sepoliaUrl); err != nil {
-		fetched = false
 		return
 	}
 	Sepolia = hashes
 
 	if hashes, err = fetchSnapshotHashes(ctx, source, amoyUrl); err != nil {
-		fetched = false
 		return
 	}
 	Amoy = hashes
 
 	if hashes, err = fetchSnapshotHashes(ctx, source, borMainnetUrl); err != nil {
-		fetched = false
 		return
 	}
 	BorMainnet = hashes
 
 	if hashes, err = fetchSnapshotHashes(ctx, source, gnosisUrl); err != nil {
-		fetched = false
 		return
 	}
 	Gnosis = hashes
 
 	if hashes, err = fetchSnapshotHashes(ctx, source, chiadoUrl); err != nil {
-		fetched = false
 		return
 	}
 	Chiado = hashes
 
 	if hashes, err = fetchSnapshotHashes(ctx, source, holeskyUrl); err != nil {
-		fetched = false
 		return
 	}
 	Holesky = hashes
 
 	if hashes, err = fetchSnapshotHashes(ctx, source, hoodiUrl); err != nil {
-		fetched = false
 		return
 	}
 	Hoodi = hashes
 
-	fetched = true
-	return fetched, nil
+	return nil
 }
 
 func fetchSnapshotHashes(ctx context.Context, source SnapshotSource, url string) ([]byte, error) {
