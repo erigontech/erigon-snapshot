@@ -44,4 +44,7 @@ func TestFetchSnapshotHashesAll(t *testing.T) {
 	if len(Holesky) == 0 {
 		t.Errorf("Holesky is empty")
 	}
+	if len(Hoodi) == 0 {
+		t.Errorf("Hoodi is empty")
+	}
 }
