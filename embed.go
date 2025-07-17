@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/erigontech/erigon-lib/log/v3"
 	_ "github.com/erigontech/erigon-snapshot/webseed"
 )
 
@@ -55,7 +54,10 @@ func getURLByChain(source SnapshotSource, chain, branch string) string {
 // Loads snapshots for all chains from the specified source and branch.
 func LoadSnapshots(ctx context.Context, source SnapshotSource, branch string) (err error) {
 	// Not going to call out that we're loading *all* chains but there's a fix coming for that.
-	log.Info("Loading remote snapshot hashes")
+
+	// Can't currently log as erigon-lib module does not exist at its canonical import location. See
+	// https://github.com/erigontech/erigon/pull/16111.
+	//log.Info("Loading remote snapshot hashes")
 	var (
 		mainnetUrl    = getURLByChain(source, "mainnet", branch)
 		sepoliaUrl    = getURLByChain(source, "sepolia", branch)
