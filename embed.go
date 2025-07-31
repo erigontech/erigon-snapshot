@@ -114,6 +114,11 @@ func LoadSnapshots(ctx context.Context, source SnapshotSource, branch string) (e
 	}
 	Hoodi = hashes
 
+	if hashes, err = fetchSnapshotHashes(ctx, source, arbSepoliaUrl); err != nil {
+		return
+	}
+	ArbSepolia = hashes
+
 	return nil
 }
 
