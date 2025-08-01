@@ -27,3 +27,6 @@ var Holesky []byte
 
 //go:embed hoodi.toml
 var Hoodi []byte
+
+//go:embed arb-sepolia.toml
+var ArbSepolia []byte
