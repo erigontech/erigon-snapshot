@@ -23,8 +23,6 @@ jobs:
 
       - run: go install github.com/pelletier/go-toml/v2/cmd/tomll@latest
 
-      - run: tomll arb-sepolia.toml
-      - run: tomll arb1.toml
       - run: tomll chiado.toml
       - run: tomll gnosis.toml
       - run: tomll mainnet.toml
@@ -32,8 +30,6 @@ jobs:
       - run: tomll holesky.toml
       - run: tomll hoodi.toml
 
-      - run: tomll webseed/arb-sepolia.toml
-      - run: tomll webseed/arb1.toml
       - run: tomll webseed/chiado.toml
       - run: tomll webseed/gnosis.toml
       - run: tomll webseed/mainnet.toml
