@@ -1,5 +1,5 @@
 name: Mirror
-run-name: Mirror after merging PR ${{ github.event.pull_request.number }} ${{ github.event.pull_request.html_url }}
+run-name: Mirror after merging PR${{ github.event.pull_request.number }} ${{ github.event.pull_request.html_url }}
 
 
 concurrency:
@@ -19,8 +19,6 @@ env:
 on:
   pull_request:
     types: [closed]      
-    # branches: # commented: tests completed, so... from now on this workflow will be triggered for all PRs merged to any target branch
-      # - michele-mirror-test # commented: tests completed, so... from now on this workflow will be triggered for all PRs merged to any target branch
 
 jobs:
   mirror:
@@ -38,7 +36,6 @@ jobs:
         # ref: ${{ github.event.pull_request.base.ref }} #commented as a subtle problem might sometimes arise in case of n on-merge PRs/unit of time
 
 
-
     - name: Download needed bits
       run: |
         set +x
@@ -49,6 +46,7 @@ jobs:
         
         
     - name: Mirror '${{ github.event.pull_request.base.ref }}' to CDN <<<<-#--#--#--#--#- !!!
+      id: mirror_execution
       run: |
         set +x
         echo '${{ secrets.MIRROR_CONF }}' | base64 -d > /tmp/mirror.conf
@@ -56,10 +54,12 @@ jobs:
           echo -e "${{ env.YELLOW }} ----------------------------------------------------------------------------------------------------------------- ${{ env.NOCOLOUR }}"
           echo -e "${{ env.YELLOW }} Files related to '${{ github.event.pull_request.base.ref }}' target branch, after PR ${{ github.event.pull_request.number }} got merged to it, were successfully mirrored to CDN ${{ env.NOCOLOUR }}"
           echo -e "${{ env.YELLOW }} ----------------------------------------------------------------------------------------------------------------- ${{ env.NOCOLOUR }}"
+          echo "rclone_failed=0" >> "$GITHUB_OUTPUT"
         else
           echo -e "${{ env.RED }} ----------------------------------------------------------------------------------------------------------------- ${{ env.NOCOLOUR }}"
           echo -e "${{ env.RED }} There was an error in the mirroring process, please check the logs ${{ env.NOCOLOUR }}"
           echo -e "${{ env.RED }} ----------------------------------------------------------------------------------------------------------------- ${{ env.NOCOLOUR }}"
+          echo "rclone_failed=1" >> "$GITHUB_OUTPUT"
         fi
   
         
@@ -75,13 +75,16 @@ jobs:
         fi
 
 
-
     - name: Upload main output as artifact
       uses: actions/upload-artifact@v4
       with:
         name: mirror_output.enc
         path: /tmp/mirror_output.enc
 
+
+    - name: Set workflow failed status when step id "mirror_execution" failed.
+      if: steps.mirror_execution.outputs.rclone_failed == 1
+      run: exit 1
 
 
     - name: Housekeeping
