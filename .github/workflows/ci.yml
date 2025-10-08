@@ -10,7 +10,7 @@ on:
 
 jobs:
   tests:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -22,17 +22,20 @@ jobs:
 
       - run: go install github.com/pelletier/go-toml/v2/cmd/tomll@latest
 
-      - run: tomll amoy.toml
-      - run: tomll bor-mainnet.toml
+      - run: tomll arb-sepolia.toml
+      - run: tomll arb1.toml
       - run: tomll chiado.toml
       - run: tomll gnosis.toml
       - run: tomll mainnet.toml
       - run: tomll sepolia.toml
+      - run: tomll holesky.toml
+      - run: tomll hoodi.toml
 
-      - run: tomll webseed/amoy.toml
-      - run: tomll webseed/bor-mainnet.toml
+      - run: tomll webseed/arb-sepolia.toml
+      - run: tomll webseed/arb1.toml
       - run: tomll webseed/chiado.toml
       - run: tomll webseed/gnosis.toml
       - run: tomll webseed/mainnet.toml
       - run: tomll webseed/sepolia.toml
-
+      - run: tomll webseed/holesky.toml
+      - run: tomll webseed/hoodi.toml
