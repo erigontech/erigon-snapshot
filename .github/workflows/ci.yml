@@ -25,6 +25,7 @@ jobs:
 
       - run: tomll arb-sepolia.toml
       - run: tomll arb1.toml
+      - run: tomll bloatnet.toml
       - run: tomll chiado.toml
       - run: tomll gnosis.toml
       - run: tomll mainnet.toml
@@ -34,6 +35,7 @@ jobs:
 
       - run: tomll webseed/arb-sepolia.toml
       - run: tomll webseed/arb1.toml
+      - run: tomll webseed/bloatnet.toml
       - run: tomll webseed/chiado.toml
       - run: tomll webseed/gnosis.toml
       - run: tomll webseed/mainnet.toml

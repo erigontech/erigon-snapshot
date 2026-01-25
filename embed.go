@@ -37,6 +37,9 @@ var Hoodi []byte
 //go:embed arb-sepolia.toml
 var ArbSepolia []byte
 
+//go:embed bloatnet.toml
+var Bloatnet []byte
+
 type SnapshotSource int
 
 const (
@@ -71,6 +74,7 @@ func LoadSnapshots(ctx context.Context, source SnapshotSource, branch string) (e
 		holeskyUrl    = getURLByChain(source, "holesky", branch)
 		hoodiUrl      = getURLByChain(source, "hoodi", branch)
 		arbSepoliaUrl = getURLByChain(source, "arb-sepolia", branch)
+		bloatnetUrl   = getURLByChain(source, "bloatnet", branch)
 	)
 	var hashes []byte
 	// Try to fetch the latest snapshot hashes from the web
@@ -118,6 +122,11 @@ func LoadSnapshots(ctx context.Context, source SnapshotSource, branch string) (e
 		return
 	}
 	ArbSepolia = hashes
+
+	if hashes, err = fetchSnapshotHashes(ctx, source, bloatnetUrl); err != nil {
+		return
+	}
+	Bloatnet = hashes
 
 	return nil
 }
