@@ -31,12 +31,12 @@ Do NOT proceed with any further steps.
 
 ## Step 2: Fetch PR Data and Run Analysis
 
-Run these commands using the Bash tool:
+Run these commands using the Bash tool. **IMPORTANT:** Use the PR number in temp file paths to avoid collisions when multiple analyses run in parallel.
 
 1. `gh pr view <number> --repo erigontech/erigon-snapshot` to get PR title, description, and metadata
 2. Save the diff to a temp file:
    ```
-   gh pr diff <number> --repo erigontech/erigon-snapshot > /tmp/pr_diff.txt
+   gh pr diff <number> --repo erigontech/erigon-snapshot > /tmp/pr_<number>_diff.txt
    ```
 3. Fetch the full toml file from the PR's head branch (with fallback for merged PRs where the branch may be deleted):
    ```
@@ -45,15 +45,15 @@ Run these commands using the Bash tool:
    TOML_FILE=$(gh pr diff <number> --repo erigontech/erigon-snapshot --name-only | head -1)
    # Try head branch first; if deleted (merged PR), fall back to merge commit, then main
    gh api "repos/erigontech/erigon-snapshot/contents/$TOML_FILE" \
-     -H "Accept: application/vnd.github.raw" -F ref="$HEAD_REF" > /tmp/pr_toml.txt 2>/dev/null \
+     -H "Accept: application/vnd.github.raw" -F ref="$HEAD_REF" > /tmp/pr_<number>_toml.txt 2>/dev/null \
    || gh api "repos/erigontech/erigon-snapshot/contents/$TOML_FILE" \
-     -H "Accept: application/vnd.github.raw" -F ref="$MERGE_COMMIT" > /tmp/pr_toml.txt 2>/dev/null \
+     -H "Accept: application/vnd.github.raw" -F ref="$MERGE_COMMIT" > /tmp/pr_<number>_toml.txt 2>/dev/null \
    || gh api "repos/erigontech/erigon-snapshot/contents/$TOML_FILE" \
-     -H "Accept: application/vnd.github.raw" -F ref="main" > /tmp/pr_toml.txt
+     -H "Accept: application/vnd.github.raw" -F ref="main" > /tmp/pr_<number>_toml.txt
    ```
 4. Run the analysis script with both files:
    ```
-   python3 "$(git rev-parse --show-toplevel)/.claude/skills/summarize-changes/analyze_diff.py" /tmp/pr_diff.txt /tmp/pr_toml.txt
+   python3 "$(git rev-parse --show-toplevel)/.claude/skills/summarize-changes/analyze_diff.py" /tmp/pr_<number>_diff.txt /tmp/pr_<number>_toml.txt
    ```
 
 The script (`analyze_diff.py` in the skill directory) parses the diff, classifies all changes, and outputs structured sections. Use its output to build the final report.
