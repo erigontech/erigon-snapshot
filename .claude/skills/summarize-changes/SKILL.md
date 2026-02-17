@@ -38,12 +38,18 @@ Run these commands using the Bash tool:
    ```
    gh pr diff <number> --repo erigontech/erigon-snapshot > /tmp/pr_diff.txt
    ```
-3. Fetch the full toml file from the PR's head branch:
+3. Fetch the full toml file from the PR's head branch (with fallback for merged PRs where the branch may be deleted):
    ```
    HEAD_REF=$(gh pr view <number> --repo erigontech/erigon-snapshot --json headRefName -q .headRefName)
+   MERGE_COMMIT=$(gh pr view <number> --repo erigontech/erigon-snapshot --json mergeCommit -q .mergeCommit.oid)
    TOML_FILE=$(gh pr diff <number> --repo erigontech/erigon-snapshot --name-only | head -1)
+   # Try head branch first; if deleted (merged PR), fall back to merge commit, then main
    gh api "repos/erigontech/erigon-snapshot/contents/$TOML_FILE" \
-     -H "Accept: application/vnd.github.raw" -F ref="$HEAD_REF" > /tmp/pr_toml.txt
+     -H "Accept: application/vnd.github.raw" -F ref="$HEAD_REF" > /tmp/pr_toml.txt 2>/dev/null \
+   || gh api "repos/erigontech/erigon-snapshot/contents/$TOML_FILE" \
+     -H "Accept: application/vnd.github.raw" -F ref="$MERGE_COMMIT" > /tmp/pr_toml.txt 2>/dev/null \
+   || gh api "repos/erigontech/erigon-snapshot/contents/$TOML_FILE" \
+     -H "Accept: application/vnd.github.raw" -F ref="main" > /tmp/pr_toml.txt
    ```
 4. Run the analysis script with both files:
    ```
@@ -51,6 +57,8 @@ Run these commands using the Bash tool:
    ```
 
 The script (`analyze_diff.py` in the skill directory) parses the diff, classifies all changes, and outputs structured sections. Use its output to build the final report.
+
+**CRITICAL: You MUST faithfully report the script's output.** Do NOT fabricate, guess, or paraphrase results. For every critical section (hash changes, unexpected deletions, version conflicts, version downgrades), copy the exact counts, file types, and ranges from the script output. If the script says `count=0` for version conflicts, report zero — do not infer conflicts from other observations.
 
 ### What the script detects
 
@@ -127,19 +135,25 @@ If NO unexpected deletions, use ✅ emoji:
 
 ### VERSION CONFLICTS
 
-If version conflicts exist, use 🚨 emoji:
+A version conflict means the SAME file type, SAME extension, AND SAME range (identical start-end) has multiple versions in the final toml. For example, both `accessor/v2.0-logaddrs.0-64.efi` and `accessor/v2.1-logaddrs.0-64.efi` existing simultaneously is a conflict. Different versions covering DIFFERENT ranges (e.g., v2.0 for 0-256 and v2.1 for 256-512) is NOT a conflict — that is a normal version transition boundary.
+
+**CRITICAL: Only report conflicts that appear in the script output.** The script already applies the correct definition (same type + same range). Copy the exact types, ranges, and counts from the `=== VERSION CONFLICTS ===` section. Do NOT infer or fabricate conflicts.
+
+If version conflicts exist (script reports count > 0), use 🚨 emoji:
 
 ### 🚨🚨🚨 VERSION CONFLICTS — DO NOT MERGE
 
 > **Multiple versions of the same file for the same range must not coexist. This will cause download conflicts for nodes.**
 
-Group by State Snapshots / CL Snapshots / EL Block Snapshots. Show a table:
+Group by State Snapshots / CL Snapshots / EL Block Snapshots. Show a table with one row per conflict from the script output:
 
-| Type | Ext | Range | Versions |
-|------|-----|-------|----------|
-| accounts | .vi | 0-32 | v1.1, v1.2 |
+| Subdir | Type | Ext | Range | Versions |
+|--------|------|-----|-------|----------|
+| accessor | accounts | .vi | 0-32 | v1.1, v1.2 |
 
-If NO version conflicts, use ✅ emoji:
+When many conflicts share the same pattern (same subdir, type, ext, versions) across consecutive ranges, they can be summarized as a single row with a range span, e.g., "0-64 through 1792-1856 (29 ranges)".
+
+If NO version conflicts (script reports count=0), use ✅ emoji:
 
 ### ✅ Version Conflicts
 
