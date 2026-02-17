@@ -149,6 +149,25 @@ Group by State Snapshots / CL Snapshots / EL Block Snapshots. List version trans
 
 Any changes to Other Files (salt files, etc.) or anything not fitting the above categories. If none, say "No other changes."
 
+---
+
+### Reviewer Recommendation
+
+Based on the two critical signals (hash changes and unexpected deletions), add a final recommendation section:
+
+If NO hash changes AND NO unexpected deletions:
+
+### ✅ Recommendation: Safe to Approve
+
+This PR contains only routine changes: range merges, version upgrades, and new data pruned from MDBX. No anomalies detected.
+
+If hash changes OR unexpected deletions exist:
+
+### 🚨 Recommendation: Investigation Required
+
+This PR contains changes that need manual review before approval:
+- (list each concern: N hash change(s), N unexpected deletion(s), with brief context from the sections above)
+
 ## Step 5: Offer to Post as PR Comment
 
 After displaying the full report, ask the user if they want you to post it as a comment on the PR.
