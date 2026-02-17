@@ -10,7 +10,26 @@ The PR to analyze: $PR_URL_OR_NUMBER
 
 If $PR_URL_OR_NUMBER is a full URL, extract the PR number from it. If it is just a number, use it directly. The repo is erigontech/erigon-snapshot.
 
-## Step 1: Fetch PR Data and Run Analysis
+## Step 1: Validate PR Origin
+
+Before doing any analysis, verify this PR was created by the snapshot release automation.
+
+Run:
+```
+gh pr view <number> --repo erigontech/erigon-snapshot --json title,labels --jq '{title: .title, labels: [.labels[].name]}'
+```
+
+The PR **must** satisfy **both** conditions:
+1. Title starts with `[automation]`
+2. Has the `automation` label
+
+If either condition is not met, **stop immediately** and respond:
+
+> This PR was not created by the snapshot release automation (expected `[automation]` title prefix and `automation` label). This skill only analyzes automated snapshot PRs.
+
+Do NOT proceed with any further steps.
+
+## Step 2: Fetch PR Data and Run Analysis
 
 Run these commands using the Bash tool:
 
@@ -43,7 +62,7 @@ The script (`analyze_diff.py` in the skill directory) parses the diff, classifie
 - **Unexpected Deletions**: removed entries not covered by any of the above (CRITICAL)
 - **Version Conflicts**: multiple versions of the same file type and range coexisting in the final toml (CRITICAL)
 
-## Step 4: Generate Report
+## Step 3: Generate Report
 
 ### File grouping
 
@@ -226,7 +245,7 @@ This PR contains changes that need manual review before approval:
 - (list each concern: N hash change(s), N unexpected deletion(s), N version conflict(s), N version downgrade(s), with brief context from the sections above)
 - Version conflicts and version downgrades specifically mean "do not merge" — they will cause download conflicts or regressions for nodes
 
-## Step 5: Offer to Post as PR Comment
+## Step 4: Offer to Post as PR Comment
 
 After displaying the full report, ask the user if they want you to post it as a comment on the PR.
 
