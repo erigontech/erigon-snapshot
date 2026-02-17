@@ -15,9 +15,20 @@ If $PR_URL_OR_NUMBER is a full URL, extract the PR number from it. If it is just
 Run these commands using the Bash tool:
 
 1. `gh pr view <number> --repo erigontech/erigon-snapshot` to get PR title, description, and metadata
-2. Save the diff to a temp file and run the analysis script:
+2. Save the diff to a temp file:
    ```
-   gh pr diff <number> --repo erigontech/erigon-snapshot > /tmp/pr_diff.txt && python3 "$(git rev-parse --show-toplevel)/.claude/skills/summarize-changes/analyze_diff.py" /tmp/pr_diff.txt
+   gh pr diff <number> --repo erigontech/erigon-snapshot > /tmp/pr_diff.txt
+   ```
+3. Fetch the full toml file from the PR's head branch:
+   ```
+   HEAD_REF=$(gh pr view <number> --repo erigontech/erigon-snapshot --json headRefName -q .headRefName)
+   TOML_FILE=$(gh pr diff <number> --repo erigontech/erigon-snapshot --name-only | head -1)
+   gh api "repos/erigontech/erigon-snapshot/contents/$TOML_FILE" \
+     -H "Accept: application/vnd.github.raw" -F ref="$HEAD_REF" > /tmp/pr_toml.txt
+   ```
+4. Run the analysis script with both files:
+   ```
+   python3 "$(git rev-parse --show-toplevel)/.claude/skills/summarize-changes/analyze_diff.py" /tmp/pr_diff.txt /tmp/pr_toml.txt
    ```
 
 The script (`analyze_diff.py` in the skill directory) parses the diff, classifies all changes, and outputs structured sections. Use its output to build the final report.
@@ -27,8 +38,10 @@ The script (`analyze_diff.py` in the skill directory) parses the diff, classifie
 - **Hash Changes**: same filename in both removed and added sets with different hash (CRITICAL)
 - **Range Merges**: multiple smaller removed ranges replaced by a single larger added range
 - **Version Upgrades**: removed entries at one version replaced by added entries at a newer version
+- **Version Downgrades**: removed entries at one version replaced by added entries at a LOWER version (CRITICAL — indicates regression)
 - **New Data Pruned from MDBX**: added entries beyond the previously highest block number
 - **Unexpected Deletions**: removed entries not covered by any of the above (CRITICAL)
+- **Version Conflicts**: multiple versions of the same file type and range coexisting in the final toml (CRITICAL)
 
 ## Step 4: Generate Report
 
@@ -93,6 +106,28 @@ If NO unexpected deletions, use ✅ emoji:
 
 ---
 
+### VERSION CONFLICTS
+
+If version conflicts exist, use 🚨 emoji:
+
+### 🚨🚨🚨 VERSION CONFLICTS — DO NOT MERGE
+
+> **Multiple versions of the same file for the same range must not coexist. This will cause download conflicts for nodes.**
+
+Group by State Snapshots / CL Snapshots / EL Block Snapshots. Show a table:
+
+| Type | Ext | Range | Versions |
+|------|-----|-------|----------|
+| accounts | .vi | 0-32 | v1.1, v1.2 |
+
+If NO version conflicts, use ✅ emoji:
+
+### ✅ Version Conflicts
+
+**No version conflicts detected.** Each file type has exactly one version per range.
+
+---
+
 ### Merged Ranges
 
 Present merges in a table format, with one table per high-level group (State Snapshots / CL Snapshots / EL Block Snapshots). Sort rows by subdir (accessor, domain, history, idx, caplin, or root) then by snapshot type (datatype).
@@ -139,6 +174,28 @@ Use continuation rows (empty Subdir cell) for subsequent files in the same subdi
 
 ---
 
+### VERSION DOWNGRADES
+
+If version downgrades exist, use 🚨 emoji:
+
+### 🚨🚨🚨 VERSION DOWNGRADES — DO NOT MERGE
+
+> **Files were replaced with a LOWER version than they had before. This is a regression that needs investigation.**
+
+Group by State Snapshots / CL Snapshots / EL Block Snapshots. Show a table:
+
+| Subdir | Type | Ext | Old Version | New Version | Ranges |
+|--------|------|-----|-------------|-------------|--------|
+| accessor | accounts | .vi | v1.2 | v1.1 | 0-256, 256-512, 512-768 |
+
+If NO version downgrades, use ✅ emoji:
+
+### ✅ Version Downgrades
+
+**No version downgrades detected.** All version changes go to equal or higher versions.
+
+---
+
 ### Version Upgrades
 
 Group by State Snapshots / CL Snapshots / EL Block Snapshots. List version transitions (e.g., v1.1 -> v2.0) by category and datatype.
@@ -153,20 +210,21 @@ Any changes to Other Files (salt files, etc.) or anything not fitting the above 
 
 ### Reviewer Recommendation
 
-Based on the two critical signals (hash changes and unexpected deletions), add a final recommendation section:
+Based on the four critical signals (hash changes, unexpected deletions, version conflicts, and version downgrades), add a final recommendation section:
 
-If NO hash changes AND NO unexpected deletions:
+If NO hash changes AND NO unexpected deletions AND NO version conflicts AND NO version downgrades:
 
 ### ✅ Recommendation: Safe to Approve
 
 This PR contains only routine changes: range merges, version upgrades, and new data pruned from MDBX. No anomalies detected.
 
-If hash changes OR unexpected deletions exist:
+If hash changes OR unexpected deletions OR version conflicts OR version downgrades exist:
 
 ### 🚨 Recommendation: Investigation Required
 
 This PR contains changes that need manual review before approval:
-- (list each concern: N hash change(s), N unexpected deletion(s), with brief context from the sections above)
+- (list each concern: N hash change(s), N unexpected deletion(s), N version conflict(s), N version downgrade(s), with brief context from the sections above)
+- Version conflicts and version downgrades specifically mean "do not merge" — they will cause download conflicts or regressions for nodes
 
 ## Step 5: Offer to Post as PR Comment
 

@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """Analyze a snapshot PR diff file and classify all changes.
 
-Usage: python3 analyze_diff.py <diff_file>
+Usage: python3 analyze_diff.py <diff_file> [toml_file]
 
 The diff file should be the raw output of `gh pr diff`.
+The optional toml_file is the full toml from the PR branch, used to detect
+version conflicts (multiple versions of the same file type coexisting).
 Outputs structured text sections for hash changes, merges, version upgrades,
-new data pruned from MDBX, and unexpected deletions.
+new data pruned from MDBX, unexpected deletions, and version conflicts.
 """
 
 import re
@@ -55,6 +57,35 @@ def hgroup(cat):
     if cat == "blocks":
         return "el"
     return "other"
+
+
+def parse_ver(v):
+    return tuple(int(x) for x in v.lstrip("v").split("."))
+
+
+def parse_toml(path):
+    filenames = []
+    with open(path) as f:
+        for line in f:
+            m = re.match(r"^'([^']+)'\s*=\s*'[a-f0-9]+'", line.strip())
+            if m:
+                filenames.append(m.group(1))
+    return filenames
+
+
+def detect_version_conflicts(filenames):
+    groups = defaultdict(set)
+    for fname in filenames:
+        info = parse_filename(fname)
+        if info["cat"] in ("other", "unknown"):
+            continue
+        key = (info["cat"], info["dt"], info["ext"], info["s"], info["e"])
+        groups[key].add(info["ver"])
+    conflicts = {}
+    for key, versions in groups.items():
+        if len(versions) >= 2:
+            conflicts[key] = sorted(versions)
+    return conflicts
 
 
 def classify(removed, added):
@@ -126,7 +157,7 @@ def classify(removed, added):
     return hash_changes, merges, version_upgrades_list, frontier, unexpected
 
 
-def print_report(removed, added, hash_changes, merges, version_upgrades_list, frontier, unexpected):
+def print_report(removed, added, hash_changes, merges, version_upgrades_list, frontier, unexpected, version_conflicts=None):
     # Hash changes
     print("=== HASH CHANGES ===")
     for f, oh, nh in hash_changes:
@@ -139,6 +170,14 @@ def print_report(removed, added, hash_changes, merges, version_upgrades_list, fr
     for u in unexpected:
         print(f"  [{hgroup(u['cat'])}] {u['fname']}")
     print(f"  count={len(unexpected)}")
+
+    # Version conflicts
+    if version_conflicts is not None:
+        print("=== VERSION CONFLICTS ===")
+        for (cat, dt, ext, s, e), versions in sorted(version_conflicts.items()):
+            ver_str = ", ".join(f"{v} (.{ext})" for v in versions)
+            print(f"  [{hgroup(cat)}] {cat}/{dt} range {s}-{e}: {ver_str}")
+        print(f"  count={len(version_conflicts)}")
 
     # Merges table
     print("=== MERGES TABLE ===")
@@ -162,14 +201,28 @@ def print_report(removed, added, hash_changes, merges, version_upgrades_list, fr
         types_str = ", ".join(sorted(set(items)))
         print(f"  [{hg}] | {cat} | {types_str} | {old_r} | {ar[0]}-{ar[1]} [{nv}] | {note}")
 
-    # Version upgrades
-    print("=== VERSION UPGRADES ===")
-    vup = defaultdict(list)
+    # Version upgrades and downgrades
+    upgrades = defaultdict(list)
+    downgrades = defaultdict(list)
     for vu in version_upgrades_list:
         vk = (hgroup(vu["cat"]), vu["cat"], tuple(sorted(vu["old_vers"])), vu["new_ver"])
         rr = [(s, e) for s, e, v in vu["rem_ranges"]]
-        vup[vk].append(f"{vu['dt']} (.{vu['ext']}): {', '.join(f'{s}-{e}' for s, e in rr)} -> {vu['add_range'][0]}-{vu['add_range'][1]}")
-    for (hg, cat, ov, nv), items in sorted(vup.items()):
+        detail = f"{vu['dt']} (.{vu['ext']}): {', '.join(f'{s}-{e}' for s, e in rr)} -> {vu['add_range'][0]}-{vu['add_range'][1]}"
+        max_old = max(parse_ver(v) for v in vu["old_vers"])
+        if parse_ver(vu["new_ver"]) < max_old:
+            downgrades[vk].append(detail)
+        else:
+            upgrades[vk].append(detail)
+
+    print("=== VERSION DOWNGRADES ===")
+    for (hg, cat, ov, nv), items in sorted(downgrades.items()):
+        print(f"  [{hg}] {cat}: {','.join(ov)} -> {nv}")
+        for i in sorted(items):
+            print(f"    {i}")
+    print(f"  count={sum(len(v) for v in downgrades.values())}")
+
+    print("=== VERSION UPGRADES ===")
+    for (hg, cat, ov, nv), items in sorted(upgrades.items()):
         print(f"  [{hg}] {cat}: {','.join(ov)} -> {nv}")
         for i in sorted(items):
             print(f"    {i}")
@@ -190,14 +243,21 @@ def print_report(removed, added, hash_changes, merges, version_upgrades_list, fr
 
 
 def main():
-    if len(sys.argv) != 2:
-        print(f"Usage: {sys.argv[0]} <diff_file>", file=sys.stderr)
+    if len(sys.argv) < 2 or len(sys.argv) > 3:
+        print(f"Usage: {sys.argv[0]} <diff_file> [toml_file]", file=sys.stderr)
         sys.exit(1)
 
     diff_file = sys.argv[1]
     removed, added = parse_diff(diff_file)
     hash_changes, merges, version_upgrades_list, frontier, unexpected = classify(removed, added)
-    print_report(removed, added, hash_changes, merges, version_upgrades_list, frontier, unexpected)
+
+    version_conflicts = None
+    if len(sys.argv) == 3:
+        toml_file = sys.argv[2]
+        filenames = parse_toml(toml_file)
+        version_conflicts = detect_version_conflicts(filenames)
+
+    print_report(removed, added, hash_changes, merges, version_upgrades_list, frontier, unexpected, version_conflicts)
 
 
 if __name__ == "__main__":
