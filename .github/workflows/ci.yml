@@ -30,7 +30,6 @@ jobs:
       - run: tomll gnosis.toml
       - run: tomll mainnet.toml
       - run: tomll sepolia.toml
-      - run: tomll holesky.toml
       - run: tomll hoodi.toml
 
       - run: tomll webseed/arb-sepolia.toml
@@ -40,5 +39,4 @@ jobs:
       - run: tomll webseed/gnosis.toml
       - run: tomll webseed/mainnet.toml
       - run: tomll webseed/sepolia.toml
-      - run: tomll webseed/holesky.toml
       - run: tomll webseed/hoodi.toml
