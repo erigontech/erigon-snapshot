@@ -30,20 +30,11 @@ func TestFetchSnapshotHashesAll(t *testing.T) {
 	if len(Sepolia) == 0 {
 		t.Errorf("Sepolia is empty")
 	}
-	if len(Amoy) == 0 {
-		t.Errorf("Amoy is empty")
-	}
-	if len(BorMainnet) == 0 {
-		t.Errorf("BorMainnet is empty")
-	}
 	if len(Gnosis) == 0 {
 		t.Errorf("Gnosis is empty")
 	}
 	if len(Chiado) == 0 {
 		t.Errorf("Chiado is empty")
-	}
-	if len(Holesky) == 0 {
-		t.Errorf("Holesky is empty")
 	}
 	if len(Hoodi) == 0 {
 		t.Errorf("Hoodi is empty")

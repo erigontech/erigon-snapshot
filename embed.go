@@ -16,20 +16,11 @@ var Mainnet []byte
 //go:embed sepolia.toml
 var Sepolia []byte
 
-//go:embed amoy.toml
-var Amoy []byte
-
-//go:embed bor-mainnet.toml
-var BorMainnet []byte
-
 //go:embed gnosis.toml
 var Gnosis []byte
 
 //go:embed chiado.toml
 var Chiado []byte
-
-//go:embed holesky.toml
-var Holesky []byte
 
 //go:embed hoodi.toml
 var Hoodi []byte
@@ -61,11 +52,8 @@ func LoadSnapshots(ctx context.Context, source SnapshotSource, branch string) (e
 	var (
 		mainnetUrl    = getURLByChain(source, "mainnet", branch)
 		sepoliaUrl    = getURLByChain(source, "sepolia", branch)
-		amoyUrl       = getURLByChain(source, "amoy", branch)
-		borMainnetUrl = getURLByChain(source, "bor-mainnet", branch)
 		gnosisUrl     = getURLByChain(source, "gnosis", branch)
 		chiadoUrl     = getURLByChain(source, "chiado", branch)
-		holeskyUrl    = getURLByChain(source, "holesky", branch)
 		hoodiUrl      = getURLByChain(source, "hoodi", branch)
 	)
 	var hashes []byte
@@ -80,16 +68,6 @@ func LoadSnapshots(ctx context.Context, source SnapshotSource, branch string) (e
 	}
 	Sepolia = hashes
 
-	if hashes, err = fetchSnapshotHashes(ctx, source, amoyUrl); err != nil {
-		return
-	}
-	Amoy = hashes
-
-	if hashes, err = fetchSnapshotHashes(ctx, source, borMainnetUrl); err != nil {
-		return
-	}
-	BorMainnet = hashes
-
 	if hashes, err = fetchSnapshotHashes(ctx, source, gnosisUrl); err != nil {
 		return
 	}
@@ -99,11 +77,6 @@ func LoadSnapshots(ctx context.Context, source SnapshotSource, branch string) (e
 		return
 	}
 	Chiado = hashes
-
-	if hashes, err = fetchSnapshotHashes(ctx, source, holeskyUrl); err != nil {
-		return
-	}
-	Holesky = hashes
 
 	if hashes, err = fetchSnapshotHashes(ctx, source, hoodiUrl); err != nil {
 		return
