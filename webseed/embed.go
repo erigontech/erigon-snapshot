@@ -22,5 +22,3 @@ var Hoodi []byte
 //go:embed arb-sepolia.toml
 var ArbSepolia []byte
 
-//go:embed bloatnet.toml
-var Bloatnet []byte
