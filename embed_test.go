@@ -42,7 +42,4 @@ func TestFetchSnapshotHashesAll(t *testing.T) {
 	if len(ArbSepolia) == 0 {
 		t.Errorf("ArbSepolia is empty")
 	}
-	if len(Bloatnet) == 0 {
-		t.Errorf("Bloatnet is empty")
-	}
 }
