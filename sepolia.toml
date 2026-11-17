@@ -1,5 +1,3 @@
-[WARN] [11-17|10:52:17.662] [env] use ERIGON_ prefix for env         var=COMMITMENT_V3
-[WARN] [11-17|10:52:17.662] [env]                                    COMMITMENT_V3=true
 'accessor/v1.1-code.0-256.vi' = 'a2c15df22a524b36c0a909581293f3a3d7f8bde6'
 'accessor/v1.1-code.1024-1280.vi' = '2dd3aad4b5b8e8cfaf417a28c3f5b4817956ff45'
 'accessor/v1.1-code.1280-1536.vi' = '8d8ee4b12924f7a6a2d92678f3fe786e81b0722c'
