@@ -77,19 +77,24 @@ file_list() { # first 5 lines of FILE, comma separated
 	echo "$list"
 }
 
-# compare SRC DST: byte-compares the *.toml files of SRC with DST and sets n_equal, n_missing, n_differ,
-# n_extra; $WORK/diff.txt lists the files that are missing or differ in DST.
+# compare SRC DST: byte-compares the *.toml files of SRC with DST and sets n_equal, n_missing (not in DST),
+# n_differ and n_extra (only in DST); $WORK/diff.txt lists the files that are missing or differ in DST.
 # Fails when rclone could not compare every file of SRC.
 compare() {
 	local combined=$WORK/combined
 	: >"$combined"
-	rclone check "$1" "$2" --include '*.toml' --download --combined "$combined" --log-level ERROR 2>>"$WORK/rclone.log" || true
+	# rclone also logs every difference as an error; keep its log only when the comparison itself failed
+	rclone check "$1" "$2" --include '*.toml' --download --combined "$combined" --log-level ERROR 2>"$WORK/check.log" || true
+	# combined report: "=" identical, "+" only in SRC, "-" only in DST, "*" different, "!" error
 	n_equal=$(grep -c '^= ' "$combined" || true)
-	n_missing=$(grep -c '^- ' "$combined" || true)
+	n_missing=$(grep -c '^+ ' "$combined" || true)
 	n_differ=$(grep -c '^\* ' "$combined" || true)
-	n_extra=$(grep -c '^+ ' "$combined" || true)
-	{ grep -E '^[-*] ' "$combined" || true; } | cut -c3- | sort >"$WORK/diff.txt"
-	((n_equal + n_missing + n_differ == $(toml_count "$1"))) && ! grep -q '^! ' "$combined"
+	n_extra=$(grep -c '^- ' "$combined" || true)
+	{ grep -E '^[+*] ' "$combined" || true; } | cut -c3- | sort >"$WORK/diff.txt"
+	if ((n_equal + n_missing + n_differ != $(toml_count "$1"))) || grep -q '^! ' "$combined"; then
+		cat "$WORK/check.log" >>"$WORK/rclone.log"
+		return 1
+	fi
 }
 
 # process BRANCH PUBLISHED: brings the bucket folder of BRANCH in line with the branch head.
