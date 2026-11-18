@@ -87,6 +87,26 @@ jobs:
       run: exit 1
 
 
+    - name: Notify about failure
+      if: failure()
+      env:
+        WEBHOOK_URL: ${{ secrets.NOTIFICATION_WEBHOOK }}
+        BASE_REF: ${{ github.event.pull_request.base.ref }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        PR_URL: ${{ github.event.pull_request.html_url }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}
+      run: |
+        if [ -z "$WEBHOOK_URL" ]; then
+          echo "::warning::NOTIFICATION_WEBHOOK is not set, failure notification not sent"
+          exit 0
+        fi
+        msg=$(printf 'Mirror of %s to CDN FAILED (after merging PR #%s %s)\nTime: %s\nRun: %s' \
+          "$BASE_REF" "$PR_NUMBER" "$PR_URL" "$(date -u '+%Y-%m-%d %H:%M:%S UTC')" "$RUN_URL")
+        jq -n --arg content "$msg" '{content: $content}' \
+          | curl -fsS --retry 3 --max-time 20 -H 'Content-Type: application/json' -d @- "$WEBHOOK_URL" >/dev/null \
+          || echo "::warning::failure notification could not be sent"
+
+
     - name: Housekeeping
       if: always()
       run: |
