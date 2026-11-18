@@ -84,6 +84,7 @@ jobs:
         rc=0
         REPORT="$GITHUB_STEP_SUMMARY" bash .github/scripts/mirror-check.sh || rc=$?
         rm -f "$RCLONE_CONFIG"
+        cat "$GITHUB_STEP_SUMMARY"
         if [ -s "$ALERT" ]; then
           echo "alert=true" >> "$GITHUB_OUTPUT"
           cat "$ALERT"
