@@ -16,13 +16,19 @@ There is no partial-credit path — if a PR is ambiguous or the checks below can
 
 If `$ARGUMENTS` contains `--dry-run`, do every check below but skip the actual `gh pr review --approve` / `gh pr merge` calls — report what *would* happen instead. If `$ARGUMENTS` lists specific PR numbers, restrict the sweep to those; otherwise sweep all open PRs.
 
-## Step 0: Fetch the classifier script once
+## Step 0: Fetch the check scripts once
 
-The `summarize-changes` skill's `analyze_diff.py` already implements the exact classification needed (hash changes, range merges, version upgrades/downgrades, new-data frontier, unexpected deletions, version conflicts). Reuse it rather than re-deriving the logic. Pull a fresh copy from `main` at the start of the run, so a stale local checkout does not change the result:
+Two scripts do the checks; do not re-derive their logic:
+- The `summarize-changes` skill's `analyze_diff.py` classifies the diff (hash changes, range merges, version upgrades/downgrades, new-data frontier, unexpected deletions, version conflicts).
+- This skill's `check_manifest.py` covers what `analyze_diff.py` skips: every changed line must be a snapshot file entry it can parse (so `salt-*.txt`, `erigondb.toml`, unknown names or other formats are not silently ignored), and the head manifest must not have a gap in any file series that the base does not have.
+
+Pull fresh copies from `main` into one directory at the start of the run, so a stale local checkout does not change the result:
 
 ```bash
-gh api repos/erigontech/erigon-snapshot/contents/.claude/skills/summarize-changes/analyze_diff.py \
-  -H "Accept: application/vnd.github.raw" > /tmp/erigon-snapshot-review/analyze_diff.py
+for f in summarize-changes/analyze_diff.py erigon-snapshot-pr-review/check_manifest.py; do
+  gh api "repos/erigontech/erigon-snapshot/contents/.claude/skills/$f" \
+    -H "Accept: application/vnd.github.raw" > "/tmp/erigon-snapshot-review/$(basename $f)"
+done
 ```
 
 (create `/tmp/erigon-snapshot-review/` first if needed; use the session scratchpad dir instead of `/tmp` if the environment gives you one).
@@ -62,9 +68,16 @@ gh api --method GET "repos/erigontech/erigon-snapshot/contents/$TOML_FILE" \
 
 python3 /tmp/erigon-snapshot-review/analyze_diff.py \
   /tmp/erigon-snapshot-review/pr_<n>_diff.txt /tmp/erigon-snapshot-review/pr_<n>_toml.txt
+
+BASE_REF=$(gh api "repos/erigontech/erigon-snapshot/compare/$(gh pr view <n> --repo erigontech/erigon-snapshot --json baseRefOid -q .baseRefOid)...$HEAD_REF" -q .merge_base_commit.sha)
+gh api --method GET "repos/erigontech/erigon-snapshot/contents/$TOML_FILE" \
+  -H "Accept: application/vnd.github.raw" -f ref="$BASE_REF" > /tmp/erigon-snapshot-review/pr_<n>_base_toml.txt
+
+python3 /tmp/erigon-snapshot-review/check_manifest.py \
+  /tmp/erigon-snapshot-review/pr_<n>_base_toml.txt /tmp/erigon-snapshot-review/pr_<n>_toml.txt
 ```
 
-Read the `=== TOTALS ===` line and the per-section counts. Trust the script's numbers over any visual impression of the diff — do not eyeball hash strings yourself.
+Read the `=== TOTALS ===` line and the per-section counts of `analyze_diff.py`, and the `=== PROBLEMS: <n> ===` line of `check_manifest.py`. Trust the scripts' numbers over any visual impression of the diff — do not eyeball hash strings yourself. If a script fails or its output is missing, the PR is unusual.
 
 ## Step 4: Mergeability + CI gate
 
@@ -81,7 +94,7 @@ Required for the routine path:
 
 Merge (routine) only if **all** of these hold:
 - Step 2 automation gate passed.
-- From Step 3: `hash_changes` count is 0, `unexpected` (deletions) count is 0, `version conflicts` count is 0, and `VERSION DOWNGRADES` count is 0.
+- From Step 3: `hash_changes` count is 0, `unexpected` (deletions) count is 0, `version conflicts` count is 0, `VERSION DOWNGRADES` count is 0, and `check_manifest.py` reports `PROBLEMS: 0`.
 - From Step 4: mergeable and CI green.
 
 Everything else → unusual, unmerged, with the specific reason(s) carried into the final report (which check failed, and the concrete numbers/files behind it — not just "looked wrong").
