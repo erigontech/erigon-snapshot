@@ -67,7 +67,15 @@ matches() {
 	return 1
 }
 
-toml_count() { find "$1" -type f -name '*.toml' | wc -l | tr -d ' '; }
+tomls() { (cd "$1" && find . -type f -name '*.toml' | sed 's|^\./||' | sort); } # *.toml paths in DIR
+toml_count() { tomls "$1" | wc -l | tr -d ' '; }
+
+# count_extra SRC BRANCH: sets n_extra, the number of *.toml files in the bucket folder of BRANCH (as listed
+# at the start) that SRC does not have
+count_extra() {
+	n_extra=$(comm -13 <(tomls "$1") <(awk -v p="$2/" 'index($0, p) == 1 { print substr($0, length(p) + 1) }' "$WORK/bucket.txt" | sort) |
+		wc -l | tr -d ' ')
+}
 
 file_list() { # first 5 lines of FILE, comma separated
 	local n list
@@ -77,29 +85,34 @@ file_list() { # first 5 lines of FILE, comma separated
 	echo "$list"
 }
 
-# compare SRC DST: byte-compares the *.toml files of SRC with DST and sets n_equal, n_missing (not in DST),
-# n_differ and n_extra (only in DST); $WORK/diff.txt lists the files that are missing or differ in DST.
-# Fails when rclone could not compare every file of SRC.
+# compare SRC BRANCH: byte-compares the *.toml files of SRC with the bucket folder of BRANCH and sets n_equal,
+# n_missing (not in the bucket), n_differ and n_extra (see count_extra); $WORK/diff.txt lists the files that
+# are missing or differ in the bucket. Fails when rclone could not compare every file of SRC.
 compare() {
-	local combined=$WORK/combined
+	local combined=$WORK/combined rc=0
 	: >"$combined"
-	# rclone also logs every difference as an error; keep its log only when the comparison itself failed
-	rclone check "$1" "$2" --include '*.toml' --download --combined "$combined" --log-level ERROR 2>"$WORK/check.log" || true
-	# combined report: "=" identical, "+" only in SRC, "-" only in DST, "*" different, "!" error
+	# --one-way: files only in the bucket are not differences, so a non-zero exit status without a missing or
+	# different file means that the comparison itself failed (e.g. a listing error).
+	# rclone also logs every difference as an error; keep its log only when the comparison failed.
+	rclone check "$1" "$REMOTE/$2" --one-way --include '*.toml' --download --combined "$combined" \
+		--log-level ERROR 2>"$WORK/check.log" || rc=$?
+	# combined report: "=" identical, "+" only in SRC, "*" different, "!" error
 	n_equal=$(grep -c '^= ' "$combined" || true)
 	n_missing=$(grep -c '^+ ' "$combined" || true)
 	n_differ=$(grep -c '^\* ' "$combined" || true)
-	n_extra=$(grep -c '^- ' "$combined" || true)
 	{ grep -E '^[+*] ' "$combined" || true; } | cut -c3- | sort >"$WORK/diff.txt"
-	if ((n_equal + n_missing + n_differ != $(toml_count "$1"))) || grep -q '^! ' "$combined"; then
+	count_extra "$1" "$2"
+	if ((n_equal + n_missing + n_differ != $(toml_count "$1"))) || grep -q '^! ' "$combined" ||
+		((rc != 0 && n_missing + n_differ == 0)); then
 		cat "$WORK/check.log" >>"$WORK/rclone.log"
 		return 1
 	fi
 }
 
 # process BRANCH PUBLISHED: brings the bucket folder of BRANCH in line with the branch head.
-# Each round fetches the current head and compares it with the bucket; when it differs, the files are
-# copied and the next round verifies the copy (and picks up a head that moved meanwhile).
+# Each round fetches the current head and compares it with the bucket; when it differs, the differing files
+# are copied and the next round verifies the copy (and picks up a head that moved meanwhile). The last round
+# only verifies.
 process() {
 	local name=$1 published=$2 src=$WORK/src round age n_bad=0 copied note
 	: >"$WORK/copied.txt"
@@ -121,18 +134,23 @@ process() {
 			return 0
 		fi
 		if [[ $(toml_count "$src") == 0 ]]; then
-			report "| \`$name\` | skipped: no toml files | |"
+			if [[ $published == true ]]; then
+				count_extra "$src" "$name"
+				report "| \`$name\` | no toml files in the branch | $n_extra toml files only in the bucket |"
+			else
+				report "| \`$name\` | skipped: no toml files | |"
+			fi
 			return 0
 		fi
 
 		if [[ $published == true || $round -gt 1 ]]; then
-			if ! compare "$src" "$REMOTE/$name"; then
+			if ! compare "$src" "$name"; then
 				fail "$name" "could not compare with the bucket"
 				return 0
 			fi
 		else # nothing in the bucket yet
 			n_equal=0 n_differ=0 n_extra=0 n_missing=$(toml_count "$src")
-			(cd "$src" && find . -type f -name '*.toml' | sed 's|^\./||' | sort) >"$WORK/diff.txt"
+			tomls "$src" >"$WORK/diff.txt"
 		fi
 		n_bad=$((n_missing + n_differ))
 		((n_bad == 0)) && break
@@ -142,7 +160,9 @@ process() {
 			alert "$name: $n_bad toml files on the CDN differ from the branch head, not repaired: $(file_list "$WORK/diff.txt")"
 			return 0
 		fi
-		if ! rclone copy "$src" "$REMOTE/$name" --include '*.toml' --ignore-times --log-level ERROR 2>>"$WORK/rclone.log"; then
+		((round == 3)) && break # a copy now would stay unverified
+		# only the files that differ; --ignore-times: upload them even if size and time happen to match
+		if ! rclone copy "$src" "$REMOTE/$name" --files-from "$WORK/diff.txt" --ignore-times --log-level ERROR 2>>"$WORK/rclone.log"; then
 			fail "$name" "copy to the bucket failed"
 			return 0
 		fi
@@ -169,9 +189,11 @@ process() {
 
 # 1. the rclone remote must exist and have a type (a config without "type" broke every Mirror run in 2026-11)
 remote_name=${REMOTE%%:*}
-if ! rclone listremotes --long | awk -v r="$remote_name:" -v t="$REMOTE_TYPE" '$1 == r && $2 == t { ok = 1 } END { exit !ok }'; then
+if ! rclone listremotes --long 2>>"$WORK/rclone.log" |
+	awk -v r="$remote_name:" -v t="$REMOTE_TYPE" '$1 == r && $2 == t { ok = 1 } END { exit !ok }'; then
 	echo "::error::rclone config has no remote '$remote_name' of type '$REMOTE_TYPE'"
 	alert "rclone config has no remote '$remote_name' of type '$REMOTE_TYPE' (check the MIRROR_CONF secret)"
+	show_rclone_errors
 	exit 1
 fi
 
