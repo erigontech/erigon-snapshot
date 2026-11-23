@@ -156,8 +156,8 @@ process() {
 		((n_bad == 0)) && break
 
 		if [[ $REPAIR != true ]]; then
+			# report only: the summary shows it, no notification
 			report "| \`$name\` | **OUT OF SYNC**, not repaired: $n_bad files ($(file_list "$WORK/diff.txt")) | |"
-			alert "$name: $n_bad toml files on the CDN differ from the branch head, not repaired: $(file_list "$WORK/diff.txt")"
 			return 0
 		fi
 		((round == 3)) && break # a copy now would stay unverified
