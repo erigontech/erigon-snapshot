@@ -31,3 +31,15 @@ jobs:
       - run: tomll mainnet.toml
       - run: tomll sepolia.toml
       - run: tomll hoodi.toml
+
+  shellcheck:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      # same level as the lint in erigontech/scripts
+      - name: ShellCheck
+        run: |
+          shellcheck --version
+          find . -name '*.sh' -not -path './.git/*' -print0 | xargs -0 -r shellcheck --severity=warning
