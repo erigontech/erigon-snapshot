@@ -1,0 +1,129 @@
+name: Mirror check
+run-name: ${{ github.event_name == 'pull_request' && 'Mirror check (report only)' || 'Mirror check' }}
+
+# Daily check that the CDN bucket holds the same *.toml files as the head of every published branch,
+# repairing what the Mirror workflow missed (it runs only on merged PRs and can fail or be cancelled).
+# Branch selection and options: see .github/scripts/mirror-check.sh. Repository variables (optional):
+#   MIRROR_CHECK_BRANCHES       globs for new branches to publish (default: "main release/*")
+#   MIRROR_CHECK_EXCLUDE        globs never checked
+#   MIRROR_CHECK_NEW_BRANCH_DAYS  new branches older than this are skipped (default: 90)
+
+on:
+  schedule:
+    - cron: '17 5 * * *'
+  workflow_dispatch:
+    inputs:
+      repair:
+        description: 'Copy differing toml files to the CDN bucket'
+        type: boolean
+        default: true
+      branches:
+        description: 'Check only these branches (space-separated globs, empty = all)'
+        type: string
+        default: ''
+      test_notification:
+        description: 'Only send a test notification'
+        type: boolean
+        default: false
+  pull_request:
+    paths:
+      - .github/workflows/mirror-check.yml
+      - .github/scripts/mirror-check.sh
+
+# Only repair runs share a group: a group keeps a single pending run, so a report-only or test run
+# must not be able to replace a pending daily repair.
+concurrency:
+  group: ${{ (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.repair && !inputs.test_notification)) && 'mirror-check' || format('mirror-check-{0}', github.run_id) }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # secrets are not available to PRs from forks
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+
+    steps:
+    # step timeouts leave time for Notify before the job timeout
+    - name: Checkout
+      if: inputs.test_notification != true
+      timeout-minutes: 5
+      uses: actions/checkout@v7
+      with:
+        fetch-depth: 1
+
+
+    - name: Install rclone
+      if: inputs.test_notification != true
+      timeout-minutes: 5
+      env:
+        RCLONE_VERSION: v1.76.0
+        RCLONE_SHA256: b00f00b3266c3764413afe599d3ec316f6f43b3e0ea8a0bc1d186d2133e46df7
+      run: |
+        zip="rclone-$RCLONE_VERSION-linux-amd64.zip"
+        curl -fsSLO "https://downloads.rclone.org/$RCLONE_VERSION/$zip"
+        echo "$RCLONE_SHA256  $zip" | sha256sum -c -
+        mkdir -p "$HOME/bin"
+        unzip -q -j "$zip" "rclone-$RCLONE_VERSION-linux-amd64/rclone" -d "$HOME/bin"
+        echo "$HOME/bin" >> "$GITHUB_PATH"
+
+
+    - name: Check and repair
+      id: check
+      if: inputs.test_notification != true
+      timeout-minutes: 15
+      env:
+        MIRROR_CONF: ${{ secrets.MIRROR_CONF }}
+        REMOTE: erigon-snapshots:public-erigon-snapshots
+        REPO_URL: ${{ github.server_url }}/${{ github.repository }}.git
+        REPAIR: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.repair) }}
+        ONLY_PATTERNS: ${{ inputs.branches }}
+        BRANCH_PATTERNS: ${{ vars.MIRROR_CHECK_BRANCHES || 'main release/*' }}
+        EXCLUDE_PATTERNS: ${{ vars.MIRROR_CHECK_EXCLUDE }}
+        NEW_BRANCH_MAX_AGE_DAYS: ${{ vars.MIRROR_CHECK_NEW_BRANCH_DAYS || '90' }}
+      run: |
+        export ALERT="$RUNNER_TEMP/alert.txt" RCLONE_CONFIG="$RUNNER_TEMP/mirror.conf"
+        printf '%s' "$MIRROR_CONF" | base64 -d > "$RCLONE_CONFIG"
+        rc=0
+        REPORT="$GITHUB_STEP_SUMMARY" bash .github/scripts/mirror-check.sh || rc=$?
+        rm -f "$RCLONE_CONFIG"
+        cat "$GITHUB_STEP_SUMMARY"
+        if [ -s "$ALERT" ]; then
+          echo "alert=true" >> "$GITHUB_OUTPUT"
+          cat "$ALERT"
+        fi
+        exit "$rc"
+
+
+    - name: Notify
+      if: >-
+        always() && github.event_name != 'pull_request' &&
+        (failure() || steps.check.outputs.alert == 'true' || inputs.test_notification == true)
+      env:
+        WEBHOOK_URL: ${{ secrets.NOTIFICATION_WEBHOOK }}
+        TEST: ${{ inputs.test_notification == true }}
+        JOB_STATUS: ${{ job.status }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}
+      run: |
+        ALERT="$RUNNER_TEMP/alert.txt"
+        # a notification that cannot be delivered fails the run, so it is still visible
+        if [ -z "$WEBHOOK_URL" ]; then
+          echo "::error::NOTIFICATION_WEBHOOK is not set, notification not sent"
+          exit 1
+        fi
+        if [ "$TEST" = true ]; then
+          title="Mirror check: test notification"
+        elif [ "$JOB_STATUS" = failure ]; then
+          title="Mirror check FAILED"
+        else
+          title="Mirror check found differences on the CDN"
+        fi
+        details=""
+        [ -s "$ALERT" ] && details=$(head -n 15 "$ALERT" | cut -c1-300 | head -c 1500)
+        msg=$(printf '%s\n%s\nTime: %s\nRun: %s' "$title" "$details" "$(date -u '+%Y-%m-%d %H:%M:%S UTC')" "$RUN_URL" | sed '/^$/d')
+        jq -n --arg content "$msg" '{content: $content}' \
+          | curl -fsS --retry 3 --max-time 20 -H 'Content-Type: application/json' -d @- "$WEBHOOK_URL" >/dev/null \
+          || { echo "::error::notification could not be sent"; exit 1; }
