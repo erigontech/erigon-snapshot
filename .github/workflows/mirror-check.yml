@@ -3,10 +3,7 @@ run-name: ${{ github.event_name == 'pull_request' && 'Mirror check (report only)
 
 # Daily check that the CDN bucket holds the same *.toml files as the head of every published branch,
 # repairing what the Mirror workflow missed (it runs only on merged PRs and can fail or be cancelled).
-# Branch selection and options: see .github/scripts/mirror-check.sh. Repository variables (optional):
-#   MIRROR_CHECK_BRANCHES       globs for new branches to publish (default: "main release/*")
-#   MIRROR_CHECK_EXCLUDE        globs never checked
-#   MIRROR_CHECK_NEW_BRANCH_DAYS  new branches older than this are skipped (default: 90)
+# Branch selection: see .github/scripts/mirror-check.sh.
 
 on:
   schedule:
@@ -21,19 +18,15 @@ on:
         description: 'Check only these branches (space-separated globs, empty = all)'
         type: string
         default: ''
-      test_notification:
-        description: 'Only send a test notification'
-        type: boolean
-        default: false
   pull_request:
     paths:
       - .github/workflows/mirror-check.yml
       - .github/scripts/mirror-check.sh
 
-# Only repair runs share a group: a group keeps a single pending run, so a report-only or test run
+# Only repair runs share a group: a group keeps a single pending run, so a report-only run
 # must not be able to replace a pending daily repair.
 concurrency:
-  group: ${{ (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.repair && !inputs.test_notification)) && 'mirror-check' || format('mirror-check-{0}', github.run_id) }}
+  group: ${{ (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.repair)) && 'mirror-check' || format('mirror-check-{0}', github.run_id) }}
   cancel-in-progress: false
 
 permissions:
@@ -49,7 +42,6 @@ jobs:
     steps:
     # step timeouts leave time for Notify before the job timeout
     - name: Checkout
-      if: inputs.test_notification != true
       timeout-minutes: 5
       uses: actions/checkout@v7
       with:
@@ -57,7 +49,6 @@ jobs:
 
 
     - name: Install rclone
-      if: inputs.test_notification != true
       timeout-minutes: 5
       env:
         RCLONE_VERSION: v1.76.0
@@ -73,7 +64,6 @@ jobs:
 
     - name: Check and repair
       id: check
-      if: inputs.test_notification != true
       timeout-minutes: 15
       env:
         MIRROR_CONF: ${{ secrets.MIRROR_CONF }}
@@ -81,9 +71,6 @@ jobs:
         REPO_URL: ${{ github.server_url }}/${{ github.repository }}.git
         REPAIR: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.repair) }}
         ONLY_PATTERNS: ${{ inputs.branches }}
-        BRANCH_PATTERNS: ${{ vars.MIRROR_CHECK_BRANCHES || 'main release/*' }}
-        EXCLUDE_PATTERNS: ${{ vars.MIRROR_CHECK_EXCLUDE }}
-        NEW_BRANCH_MAX_AGE_DAYS: ${{ vars.MIRROR_CHECK_NEW_BRANCH_DAYS || '90' }}
       run: |
         export ALERT="$RUNNER_TEMP/alert.txt" RCLONE_CONFIG="$RUNNER_TEMP/mirror.conf"
         printf '%s' "$MIRROR_CONF" | base64 -d > "$RCLONE_CONFIG"
@@ -101,10 +88,9 @@ jobs:
     - name: Notify
       if: >-
         always() && github.event_name != 'pull_request' &&
-        (failure() || steps.check.outputs.alert == 'true' || inputs.test_notification == true)
+        (failure() || steps.check.outputs.alert == 'true')
       env:
         WEBHOOK_URL: ${{ secrets.NOTIFICATION_WEBHOOK }}
-        TEST: ${{ inputs.test_notification == true }}
         JOB_STATUS: ${{ job.status }}
         RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}
       run: |
@@ -114,9 +100,7 @@ jobs:
           echo "::error::NOTIFICATION_WEBHOOK is not set, notification not sent"
           exit 1
         fi
-        if [ "$TEST" = true ]; then
-          title="Mirror check: test notification"
-        elif [ "$JOB_STATUS" = failure ]; then
+        if [ "$JOB_STATUS" = failure ]; then
           title="Mirror check FAILED"
         else
           title="Mirror check found differences on the CDN"
