@@ -26,7 +26,7 @@ SNAPSHOT_CATS = ("blocks", "caplin", "accessor", "domain", "history", "idx")
 
 def read_lines(path):
     with open(path) as f:
-        return Counter(line.strip() for line in f if line.strip())
+        return Counter(line.rstrip() for line in f if line.strip())
 
 
 def changed_line_problems(base, head):
@@ -44,7 +44,7 @@ def changed_line_problems(base, head):
 def gaps(lines):
     series = defaultdict(list)
     for line in lines:
-        m = ENTRY.match(line)
+        m = ENTRY.match(line.strip())
         if not m:
             continue
         info = parse_filename(m[1])
