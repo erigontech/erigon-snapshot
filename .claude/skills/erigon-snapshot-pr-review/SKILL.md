@@ -20,7 +20,9 @@ If `$ARGUMENTS` contains `--dry-run`, do every check below but skip the actual `
 
 Two scripts do the checks; do not re-derive their logic:
 - The `summarize-changes` skill's `analyze_diff.py` classifies the diff (hash changes, range merges, version upgrades/downgrades, new-data frontier, unexpected deletions, version conflicts).
-- This skill's `check_manifest.py` covers what `analyze_diff.py` skips: every changed line must be a snapshot file entry it can parse (so `salt-*.txt`, `erigondb.toml`, unknown names or other formats are not silently ignored), and the head manifest must not have a gap in any file series that the base does not have.
+- This skill's `check_manifest.py` covers what `analyze_diff.py` skips: every changed line must be a snapshot file entry it can parse (so `salt-*.txt`, `erigondb.toml`, unknown names or other formats are not silently ignored).
+
+Gaps and overlaps in the file ranges are not checked here: the publishing pipeline runs `erigon seg integrity --check=Publishable` on the datadir before it opens the PR.
 
 Pull fresh copies from `main` into one directory at the start of the run, so a stale local checkout does not change the result:
 
